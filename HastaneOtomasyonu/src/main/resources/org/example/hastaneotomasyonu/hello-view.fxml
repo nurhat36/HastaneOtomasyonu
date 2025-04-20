@@ -1,16 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.example.hastaneotomasyonu.HelloController">
+<VBox alignment="CENTER" spacing="10.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="org.example.hastaneotomasyonu.Controller.HelloController">
+
     <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
+    <Label text="Hasta Adı:" />
+    <TextField fx:id="txtAd" />
+
+    <Label text="Hasta Yaşı:" />
+    <TextField fx:id="txtYas" />
+
+    <Label text="Cinsiyet:" />
+    <ComboBox fx:id="comboCinsiyet">
+        <items>
+            <FXCollections fx:factory="observableArrayList">
+                <String fx:value="E" />
+                <String fx:value="K" />
+            </FXCollections>
+        </items>
+    </ComboBox>
+
+    <Label text="Mahkum mu?" />
+    <CheckBox fx:id="checkMahkum" text="Evet" />
+
+    <Label text="Engellilik Oranı (%):" />
+    <TextField fx:id="txtEngelli" />
+
+    <Label text="Kanama Durumu:" />
+    <ComboBox fx:id="comboKanama">
+        <items>
+            <FXCollections fx:factory="observableArrayList">
+                <String fx:value="kanamaYok" />
+                <String fx:value="kanama" />
+                <String fx:value="agirKanama" />
+            </FXCollections>
+        </items>
+    </ComboBox>
+
+    <Label text="Kayıt Saati (örnek: 8.30):" />
+    <TextField fx:id="txtSaat" />
+
+    <Button onAction="#hastaEkle" text="Hasta Ekle" />
+    <Button onAction="#tumHastalariGoster" text="Tüm Hastaları Göster" />
+
+    <Label fx:id="lblSonuc" prefHeight="20.0" prefWidth="135.0" text="" />
 </VBox>
