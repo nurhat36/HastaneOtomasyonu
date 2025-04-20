@@ -33,20 +33,18 @@ public class HelloController {
     @FXML
     public void initialize() {
         HastaHeap = new HastaHeap(100); // kapasiteyi ihtiyacınıza göre ayarlayabilirsiniz
-        verileriHeapEkle(HastaHeap);
+        verileriHeapEkle();
 
         // İlk hastayı çıkaralım
-        while (!HastaHeap.bosMu()) {
-            Hasta hasta = HastaHeap.cikar();
-            System.out.println("Muayene edilecek: " + hasta.hastaAdi + " - Öncelik: " + hasta.oncelikPuani);
-        }
+
         // ComboBox seçenekleri ekleniyor
         comboCinsiyet.getItems().addAll("Erkek", "Kadın", "Diğer");
         comboKanama.getItems().addAll("Yok", "Kanama", "AgirKanama");
     }
-    public void verileriHeapEkle(HastaHeap heap) {
+    public void verileriHeapEkle() {
+
         try (BufferedReader br = new BufferedReader(
-                new InputStreamReader(Objects.requireNonNull(getClass().getResource("Hasta.txt")).openStream(), StandardCharsets.UTF_8))) {
+                new InputStreamReader(getClass().getResource("/org/example/hastaneotomasyonu/Hasta.txt").openStream(), StandardCharsets.UTF_8))) {
 
             String line;
             while ((line = br.readLine()) != null) {
@@ -58,17 +56,17 @@ public class HelloController {
                     boolean mahkum = Boolean.parseBoolean(parcalar[4].trim());
                     int engelli = Integer.parseInt(parcalar[5].trim());
                     String kanama = parcalar[6].trim().toLowerCase();
-                    double kayitSaati = Double.parseDouble(parcalar[7].trim().replace(".", ","));
+                    double kayitSaati = Double.parseDouble(parcalar[7].trim().replace(",", "."));
 
                     Hasta hasta = new Hasta(ad, yas, cinsiyet, mahkum, engelli, kanama, kayitSaati);
                     hasta.oncelikPuaniHesapla();
                     hasta.muayeneSuresiHesapla();
 
-                    heap.ekle(hasta);
+                    HastaHeap.ekle(hasta);
                 }
             }
 
-            System.out.println("Başlangıç hastaları heap'e eklendi. Toplam hasta: " + heap.boyut());
+            System.out.println("Başlangıç hastaları heap'e eklendi. Toplam hasta: " + HastaHeap.boyut());
 
         } catch (Exception e) {
             System.err.println("Veriler okunurken hata oluştu: " + e.getMessage());
@@ -102,13 +100,17 @@ public class HelloController {
     @FXML
     private void tumHastalariGoster() {
         StringBuilder sb = new StringBuilder();
+        System.out.println("Heap boyutu: " + HastaHeap.boyut());
 
         // Geçici bir heap kopyasıyla çalışalım, orijinali bozulmasın
         HastaHeap geciciHeap = new HastaHeap(HastaHeap.boyut());
+
+        // HastaHeap içindeki elemanları geçici heap'e kopyala
         for (int i = 0; i < HastaHeap.boyut(); i++) {
-            geciciHeap.ekle(HastaHeap.heap[i]);
+            geciciHeap.ekle(HastaHeap.heap[i]); // ya da doğrudan heap dizisini kullanarak ekleme yapabilirsiniz
         }
 
+        // Geçici heap'ten elemanları çıkarıp ekrana yazdır
         while (!geciciHeap.bosMu()) {
             Hasta hasta = geciciHeap.cikar();
             sb.append(hasta.hastaAdi)
@@ -117,7 +119,9 @@ public class HelloController {
                     .append("\n");
         }
 
+        // Sonuçları ekrana yazdır
         lblSonuc.setText(sb.toString());
     }
+
 
 }

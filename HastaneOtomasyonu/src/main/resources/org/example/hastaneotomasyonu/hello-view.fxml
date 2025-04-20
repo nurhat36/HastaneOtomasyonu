@@ -55,5 +55,5 @@
     <Button onAction="#hastaEkle" text="Hasta Ekle" />
     <Button onAction="#tumHastalariGoster" text="Tüm Hastaları Göster" />
 
-    <Label fx:id="lblSonuc" prefHeight="20.0" prefWidth="135.0" text="" />
+    <Label fx:id="lblSonuc" prefHeight="20.0" prefWidth="135.0" text="gngfbdfc" />
 </VBox>
