@@ -3,12 +3,16 @@ package org.example.hastaneotomasyonu.Controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import org.example.hastaneotomasyonu.Algorithm.HastaHeap;
+import org.example.hastaneotomasyonu.HelloApplication;
 import org.example.hastaneotomasyonu.models.Hasta;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+
+import static org.example.hastaneotomasyonu.HelloApplication.setRoot;
 
 public class HelloController {
 
@@ -28,7 +32,7 @@ public class HelloController {
     private TextField txtSaat;
     @FXML
     private Label lblSonuc;
-    HastaHeap HastaHeap;
+    public static HastaHeap HastaHeap;
 
     @FXML
     public void initialize() {
@@ -98,7 +102,8 @@ public class HelloController {
         }
     }
     @FXML
-    private void tumHastalariGoster() {
+    private void tumHastalariGoster() throws IOException {
+        setRoot("hastagoster");
         StringBuilder sb = new StringBuilder();
         System.out.println("Heap boyutu: " + HastaHeap.boyut());
 

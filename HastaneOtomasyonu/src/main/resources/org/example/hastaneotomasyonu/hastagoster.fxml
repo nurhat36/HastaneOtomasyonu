@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.hastaneotomasyonu.Controller.HastaGosterController">
+   <children>
+       <TableView fx:id="tableView" prefWidth="600">
+           <columns>
+               <TableColumn fx:id="adiColumn" text="Hasta Adı" prefWidth="150"/>
+               <TableColumn fx:id="puanColumn" text="Öncelik Puanı" prefWidth="150"/>
+               <TableColumn fx:id="saatColumn" text="Muayene Saati" prefWidth="150"/>
+               <TableColumn fx:id="sureColumn" text="Muayene Süresi" prefWidth="150"/>
+           </columns>
+       </TableView>
+
+   </children>
+</AnchorPane>

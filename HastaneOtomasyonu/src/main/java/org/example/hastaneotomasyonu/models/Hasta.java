@@ -58,4 +58,22 @@ public class Hasta implements Comparable<Hasta> {
     public int compareTo(Hasta other) {
         return Integer.compare(other.oncelikPuani, this.oncelikPuani); // max-heap için
     }
+
+    // --- GÖSTERİM İÇİN GEREKEN GETTER'LAR ---
+
+    public String getHastaAdi() {
+        return hastaAdi;
+    }
+
+    public int getOncelikPuani() {
+        return oncelikPuani;
+    }
+
+    public double getMuayeneSaati() {
+        return muayeneSaati;
+    }
+
+    public int getMuayeneSuresi() {
+        return muayeneSuresi;
+    }
 }
