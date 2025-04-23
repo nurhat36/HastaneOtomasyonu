@@ -8,5 +8,7 @@ module org.example.hastaneotomasyonu {
     opens org.example.hastaneotomasyonu to javafx.fxml;
     exports org.example.hastaneotomasyonu;
     exports org.example.hastaneotomasyonu.Controller;
+    exports org.example.hastaneotomasyonu.models;
     opens org.example.hastaneotomasyonu.Controller to javafx.fxml;
+    opens org.example.hastaneotomasyonu.models to javafx.base;
 }

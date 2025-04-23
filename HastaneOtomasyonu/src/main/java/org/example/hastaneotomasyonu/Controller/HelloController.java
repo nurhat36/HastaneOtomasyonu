@@ -34,19 +34,18 @@ public class HelloController {
     private Label lblSonuc;
     public static HastaHeap HastaHeap;
 
+    private double muayeneSaati = 9.00; // Başlangıç saati
+
     @FXML
     public void initialize() {
-        HastaHeap = new HastaHeap(100); // kapasiteyi ihtiyacınıza göre ayarlayabilirsiniz
+        HastaHeap = new HastaHeap(100);
         verileriHeapEkle();
 
-        // İlk hastayı çıkaralım
-
-        // ComboBox seçenekleri ekleniyor
         comboCinsiyet.getItems().addAll("Erkek", "Kadın", "Diğer");
         comboKanama.getItems().addAll("Yok", "Kanama", "AgirKanama");
     }
-    public void verileriHeapEkle() {
 
+    public void verileriHeapEkle() {
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(getClass().getResource("/org/example/hastaneotomasyonu/Hasta.txt").openStream(), StandardCharsets.UTF_8))) {
 
@@ -66,7 +65,9 @@ public class HelloController {
                     hasta.oncelikPuaniHesapla();
                     hasta.muayeneSuresiHesapla();
 
+                    hasta.setMuayeneSaati(muayeneSaati);
                     HastaHeap.ekle(hasta);
+                    guncelleMuayeneSaati(hasta.muayeneSuresi);
                 }
             }
 
@@ -89,44 +90,51 @@ public class HelloController {
             String kanama = comboKanama.getValue();
             double saat = Double.parseDouble(txtSaat.getText());
 
-            // Hasta nesnesi oluştur
-            org.example.hastaneotomasyonu.models.Hasta yeniHasta =
-                    new org.example.hastaneotomasyonu.models.Hasta(ad, yas, cinsiyet, mahkum, engelli, kanama, saat);
+            Hasta yeniHasta = new Hasta(ad, yas, cinsiyet, mahkum, engelli, kanama, saat);
             yeniHasta.oncelikPuaniHesapla();
             yeniHasta.muayeneSuresiHesapla();
 
-            // Sonucu ekrana yazdır
-            lblSonuc.setText("Hasta eklendi! Öncelik: " + yeniHasta.oncelikPuani + ", Süre: " + yeniHasta.muayeneSuresi);
+            yeniHasta.setMuayeneSaati(muayeneSaati);
+            HastaHeap.ekle(yeniHasta);
+            guncelleMuayeneSaati(yeniHasta.muayeneSuresi);
+
+            lblSonuc.setText("Hasta eklendi! Öncelik: " + yeniHasta.oncelikPuani +
+                    ", Süre: " + yeniHasta.muayeneSuresi +
+                    ", Muayene Saati: " + String.format("%.2f", yeniHasta.getMuayeneSaati()));
         } catch (Exception e) {
             lblSonuc.setText("Hata: " + e.getMessage());
         }
     }
+
+    private void guncelleMuayeneSaati(int ekSure) {
+        int saat = (int) muayeneSaati;
+        int dakika = (int) Math.round((muayeneSaati - saat) * 100);
+
+        int toplamDakika = dakika + ekSure;
+        saat += toplamDakika / 60;
+        dakika = toplamDakika % 60;
+
+        muayeneSaati = saat + (dakika / 100.0);
+    }
+
     @FXML
     private void tumHastalariGoster() throws IOException {
         setRoot("hastagoster");
         StringBuilder sb = new StringBuilder();
-        System.out.println("Heap boyutu: " + HastaHeap.boyut());
-
-        // Geçici bir heap kopyasıyla çalışalım, orijinali bozulmasın
         HastaHeap geciciHeap = new HastaHeap(HastaHeap.boyut());
 
-        // HastaHeap içindeki elemanları geçici heap'e kopyala
         for (int i = 0; i < HastaHeap.boyut(); i++) {
-            geciciHeap.ekle(HastaHeap.heap[i]); // ya da doğrudan heap dizisini kullanarak ekleme yapabilirsiniz
+            geciciHeap.ekle(HastaHeap.heap[i]);
         }
 
-        // Geçici heap'ten elemanları çıkarıp ekrana yazdır
         while (!geciciHeap.bosMu()) {
             Hasta hasta = geciciHeap.cikar();
             sb.append(hasta.hastaAdi)
-                    .append(" - Öncelik: ")
-                    .append(hasta.oncelikPuani)
+                    .append(" - Öncelik: ").append(hasta.oncelikPuani)
+                    .append(" - Muayene Saati: ").append(String.format("%.2f", hasta.getMuayeneSaati()))
                     .append("\n");
         }
 
-        // Sonuçları ekrana yazdır
         lblSonuc.setText(sb.toString());
     }
-
-
 }

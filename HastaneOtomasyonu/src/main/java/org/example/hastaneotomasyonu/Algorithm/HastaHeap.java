@@ -18,13 +18,18 @@ public class HastaHeap {
     public void ekle(Hasta hasta) {
         if (size == capacity) {
             System.out.println("Heap dolu!");
-            return;
+            kapasiteyiArtir();
         }
 
         heap[size] = hasta;
         yukariTasima(size);
         size++;
     }
+    private void kapasiteyiArtir() {
+        capacity = capacity * 2;
+        heap = Arrays.copyOf(heap, capacity);
+    }
+
 
     public Hasta cikar() {
         if (size == 0) return null;

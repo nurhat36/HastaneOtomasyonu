@@ -55,8 +55,8 @@ public class Hasta implements Comparable<Hasta> {
     }
 
     @Override
-    public int compareTo(Hasta other) {
-        return Integer.compare(other.oncelikPuani, this.oncelikPuani); // max-heap için
+    public int compareTo(Hasta diger) {
+        return Integer.compare(this.oncelikPuani, diger.oncelikPuani);
     }
 
     // --- GÖSTERİM İÇİN GEREKEN GETTER'LAR ---
@@ -72,6 +72,13 @@ public class Hasta implements Comparable<Hasta> {
     public double getMuayeneSaati() {
         return muayeneSaati;
     }
+
+    public void setMuayeneSaati(double saat) {
+        this.muayeneSaati = saat;
+    }
+
+
+
 
     public int getMuayeneSuresi() {
         return muayeneSuresi;
