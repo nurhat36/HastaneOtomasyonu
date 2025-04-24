@@ -56,8 +56,11 @@ public class Hasta implements Comparable<Hasta> {
 
     @Override
     public int compareTo(Hasta diger) {
-        return Integer.compare(this.oncelikPuani, diger.oncelikPuani);
+        // YÜKSEK PUAN önce gelsin (MAX HEAP mantığı)
+        return Integer.compare(diger.oncelikPuani, this.oncelikPuani);
     }
+
+
 
     // --- GÖSTERİM İÇİN GEREKEN GETTER'LAR ---
 
