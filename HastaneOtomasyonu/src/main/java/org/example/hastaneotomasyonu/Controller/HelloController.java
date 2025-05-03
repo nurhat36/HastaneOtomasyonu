@@ -163,6 +163,7 @@ public class HelloController {
                 new InputStreamReader(getClass().getResource("/org/example/hastaneotomasyonu/Hasta.txt").openStream(), StandardCharsets.UTF_8))) {
 
             String line;
+            double previousMuayeneSaati = 0; // Önceki muayene saati
             while ((line = br.readLine()) != null) {
                 String[] parcalar = line.split(",");
                 if (parcalar.length >= 8) {
@@ -174,8 +175,26 @@ public class HelloController {
                     String kanama = parcalar[6].trim().toLowerCase();
                     double kayitSaati = Double.parseDouble(parcalar[7].trim().replace(",", "."));
 
+                    // Muayene saati hesaplanacak
+                    double muayeneSaati = kayitSaati;
+
+                    // İlk hastadan sonraki hastalar için muayene saati belirleniyor
+                    if (previousMuayeneSaati != 0 && muayeneSaati <= previousMuayeneSaati) {
+                        // Önceki hastanın muayene saati + süresi kadar ilerletiyoruz
+                        muayeneSaati = previousMuayeneSaati + 0.5; // Muayene süresi 30 dakika (0.5 saat)
+                    }
+
+                    // Hasta oluşturuluyor
                     Hasta hasta = new Hasta(ad, yas, cinsiyet, mahkum, engelli, kanama, kayitSaati);
+
+                    // Muayene saati hastaya atanıyor
+                    hasta.setMuayeneSaati(muayeneSaati);
+
+                    // Listeye ekleniyor
                     bekleyenHastalar.add(hasta);
+
+                    // Sonraki hastanın muayene saati için güncelleniyor
+                    previousMuayeneSaati = muayeneSaati;
                 }
             }
 
@@ -189,6 +208,7 @@ public class HelloController {
             e.printStackTrace();
         }
     }
+
 
     @FXML
     private void heapGoster() throws IOException {
