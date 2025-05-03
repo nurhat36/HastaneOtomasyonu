@@ -26,13 +26,13 @@ public class HeapViewController {
         GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
-        drawNode(gc, 0, canvas.getWidth() / 2, 50, canvas.getWidth() / 4);
+        drawNode(gc, heap.getRoot(), canvas.getWidth() / 2, 50, canvas.getWidth() / 4);
     }
 
-    private void drawNode(GraphicsContext gc, int index, double x, double y, double offset) {
-        if (index >= heap.boyut()) return;
+    private void drawNode(GraphicsContext gc, HastaHeap.Node node, double x, double y, double offset) {
+        if (node == null) return;
 
-        Hasta hasta = heap.heap[index];
+        Hasta hasta = node.getData();
 
         // Daire çiz
         gc.setFill(Color.LIGHTBLUE);
@@ -47,21 +47,19 @@ public class HeapViewController {
         gc.fillText(text, x - 25, y - 10);
 
         // Sol çocuk
-        int leftIndex = 2 * index + 1;
-        if (leftIndex < heap.boyut()) {
+        if (node.getLeft() != null) {
             double childX = x - offset;
             double childY = y + 80;
             gc.strokeLine(x, y + 30, childX, childY - 30);
-            drawNode(gc, leftIndex, childX, childY, offset / 2);
+            drawNode(gc, node.getLeft(), childX, childY, offset / 2);
         }
 
         // Sağ çocuk
-        int rightIndex = 2 * index + 2;
-        if (rightIndex < heap.boyut()) {
+        if (node.getRight() != null) {
             double childX = x + offset;
             double childY = y + 80;
             gc.strokeLine(x, y + 30, childX, childY - 30);
-            drawNode(gc, rightIndex, childX, childY, offset / 2);
+            drawNode(gc, node.getRight(), childX, childY, offset / 2);
         }
     }
 }

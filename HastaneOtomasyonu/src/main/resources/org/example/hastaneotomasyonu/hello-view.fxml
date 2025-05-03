@@ -9,53 +9,79 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
 
-<VBox alignment="CENTER" spacing="10.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="org.example.hastaneotomasyonu.Controller.HelloController">
+<VBox alignment="CENTER" spacing="15.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="org.example.hastaneotomasyonu.Controller.HelloController">
 
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
-    <Label text="Hasta Adı:" />
-    <TextField fx:id="txtAd" />
+    <!-- Hasta Adı -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Hasta Adı:" />
+        <TextField fx:id="txtAd" promptText="Adı girin..." />
+    </HBox>
 
-    <Label text="Hasta Yaşı:" />
-    <TextField fx:id="txtYas" />
+    <!-- Hasta Yaşı -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Hasta Yaşı:" />
+        <TextField fx:id="txtYas" promptText="Yaşını girin..." />
+    </HBox>
 
-    <Label text="Cinsiyet:" />
-    <ComboBox fx:id="comboCinsiyet">
-        <items>
-            <FXCollections fx:factory="observableArrayList">
-                <String fx:value="E" />
-                <String fx:value="K" />
-            </FXCollections>
-        </items>
-    </ComboBox>
+    <!-- Cinsiyet -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Cinsiyet:" />
+        <ComboBox fx:id="comboCinsiyet">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="E" />
+                    <String fx:value="K" />
+                </FXCollections>
+            </items>
+        </ComboBox>
+    </HBox>
 
-    <Label text="Mahkum mu?" />
-    <CheckBox fx:id="checkMahkum" text="Evet" />
+    <!-- Mahkum Durumu -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Mahkum mu?" />
+        <CheckBox fx:id="checkMahkum" text="Evet" />
+    </HBox>
 
-    <Label text="Engellilik Oranı (%):" />
-    <TextField fx:id="txtEngelli" />
+    <!-- Engellilik Oranı -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Engellilik Oranı (%):" />
+        <TextField fx:id="txtEngelli" promptText="Engellilik oranını girin..." />
+    </HBox>
 
-    <Label text="Kanama Durumu:" />
-    <ComboBox fx:id="comboKanama">
-        <items>
-            <FXCollections fx:factory="observableArrayList">
-                <String fx:value="kanamaYok" />
-                <String fx:value="kanama" />
-                <String fx:value="agirKanama" />
-            </FXCollections>
-        </items>
-    </ComboBox>
+    <!-- Kanama Durumu -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Kanama Durumu:" />
+        <ComboBox fx:id="comboKanama">
+            <items>
+                <FXCollections fx:factory="observableArrayList">
+                    <String fx:value="kanamaYok" />
+                    <String fx:value="kanama" />
+                    <String fx:value="agirKanama" />
+                </FXCollections>
+            </items>
+        </ComboBox>
+    </HBox>
 
-    <Label text="Kayıt Saati (örnek: 8.30):" />
-    <TextField fx:id="txtSaat" />
+    <!-- Kayıt Saati -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Kayıt Saati (örnek: 8.30):" />
+        <TextField fx:id="txtSaat" promptText="Saat bilgisini girin..." />
+    </HBox>
 
-    <Button onAction="#hastaEkle" text="Hasta Ekle" />
-    <Button onAction="#tumHastalariGoster" text="Tüm Hastaları Göster" />
-    <Button text="Heap Görüntüle" onAction="#heapGoster" layoutX="50" layoutY="50"/>
+    <!-- Düğmeler -->
+    <HBox spacing="15" alignment="CENTER">
+        <Button onAction="#hastaEkle" text="Hasta Ekle" />
+        <Button onAction="#tumHastalariGoster" text="Tüm Hastaları Göster" />
+        <Button text="Heap Görüntüle" onAction="#heapGoster" />
+    </HBox>
 
+    <!-- Sonuç Etiketi -->
+    <Label fx:id="lblSonuc" prefHeight="20.0" prefWidth="200.0" text="Sonuç: " style="-fx-font-weight: bold;" />
 
-    <Label fx:id="lblSonuc" prefHeight="20.0" prefWidth="135.0" text="gngfbdfc" />
 </VBox>

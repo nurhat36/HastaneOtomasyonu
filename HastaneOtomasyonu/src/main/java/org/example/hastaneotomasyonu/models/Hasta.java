@@ -80,8 +80,14 @@ public class Hasta implements Comparable<Hasta> {
         // Eğer yeni muayene saati, hasta kayıt saatinden önce ise, hata fırlatıyoruz
         if (yeniMuayeneSaati < hastaKayitSaati) {
             throw new IllegalArgumentException("Muayene saati (" + yeniMuayeneSaati + ") kayıt saatinden önce olamaz. Kayıt Saati: " + hastaKayitSaati);
+        } else if (yeniMuayeneSaati<9.00) {
+            this.muayeneSaati=(yeniMuayeneSaati%8.00)+9.00;
+
+        }else{
+            this.muayeneSaati = yeniMuayeneSaati;
+
         }
-        this.muayeneSaati = yeniMuayeneSaati;
+
     }
     public double getHastaKayitSaati() {
         return this.hastaKayitSaati;
