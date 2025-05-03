@@ -54,6 +54,8 @@
 
     <Button onAction="#hastaEkle" text="Hasta Ekle" />
     <Button onAction="#tumHastalariGoster" text="Tüm Hastaları Göster" />
+    <Button text="Heap Görüntüle" onAction="#heapGoster" layoutX="50" layoutY="50"/>
+
 
     <Label fx:id="lblSonuc" prefHeight="20.0" prefWidth="135.0" text="gngfbdfc" />
 </VBox>

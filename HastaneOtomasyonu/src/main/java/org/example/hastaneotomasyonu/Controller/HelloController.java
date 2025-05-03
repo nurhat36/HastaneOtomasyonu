@@ -1,9 +1,17 @@
 package org.example.hastaneotomasyonu.Controller;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.example.hastaneotomasyonu.Algorithm.HastaHeap;
 import org.example.hastaneotomasyonu.HelloApplication;
+import org.example.hastaneotomasyonu.Services.GlobalHeapService;
 import org.example.hastaneotomasyonu.models.Hasta;
 
 import java.io.BufferedReader;
@@ -11,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import org.example.hastaneotomasyonu.Services.ClockService;
 
 import static org.example.hastaneotomasyonu.HelloApplication.setRoot;
 
@@ -43,7 +52,30 @@ public class HelloController {
 
         comboCinsiyet.getItems().addAll("Erkek", "Kadın", "Diğer");
         comboKanama.getItems().addAll("Yok", "Kanama", "AgirKanama");
+        Timeline clock = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+            ClockService.updateTime();
+            lblSonuc.setText(ClockService.getCurrentTime());
+        }));
+        clock.setCycleCount(Timeline.INDEFINITE);
+        clock.play();
+
     }
+    @FXML
+    private void heapGoster() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/hastaneotomasyonu/heap-view.fxml"));
+        Parent root = loader.load();
+
+        // HeapViewController'a eriş ve heap'i ver
+        HeapViewController controller = loader.getController();
+        controller.setHeap(GlobalHeapService.getHeap()); // heap burada global olarak saklanmalı
+
+        Stage stage = new Stage();
+        stage.setTitle("Hasta Heap Görselleştirici");
+        stage.setScene(new Scene(root));
+        stage.centerOnScreen();
+        stage.show();
+    }
+
 
     public void verileriHeapEkle() {
         try (BufferedReader br = new BufferedReader(
@@ -120,21 +152,6 @@ public class HelloController {
     @FXML
     private void tumHastalariGoster() throws IOException {
         setRoot("hastagoster");
-        StringBuilder sb = new StringBuilder();
-        HastaHeap geciciHeap = new HastaHeap(HastaHeap.boyut());
 
-        for (int i = 0; i < HastaHeap.boyut(); i++) {
-            geciciHeap.ekle(HastaHeap.heap[i]);
-        }
-
-        while (!geciciHeap.bosMu()) {
-            Hasta hasta = geciciHeap.cikar();
-            sb.append(hasta.hastaAdi)
-                    .append(" - Öncelik: ").append(hasta.oncelikPuani)
-                    .append(" - Muayene Saati: ").append(String.format("%.2f", hasta.getMuayeneSaati()))
-                    .append("\n");
-        }
-
-        lblSonuc.setText(sb.toString());
     }
 }
