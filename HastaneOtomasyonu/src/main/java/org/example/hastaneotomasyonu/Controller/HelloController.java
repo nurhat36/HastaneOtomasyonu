@@ -19,9 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import static org.example.hastaneotomasyonu.HelloApplication.setRoot;
 
@@ -65,15 +63,26 @@ public class HelloController {
 
             // Uygulama açıldığında mevcut saati alıyoruz
             Iterator<Hasta> iterator = bekleyenHastalar.iterator();
+            System.out.println("hasta adi      "+"muayene saati        "+"hasta kaıt saati");
             while (iterator.hasNext()) {
                 Hasta h = iterator.next();
                 // Sadece 9:00'dan sonra ve geçerli zamandaki hastaları işliyoruz
                 if (h.hastaKayitSaati >= baslangicSaati && h.hastaKayitSaati <= currentTime) {
                     h.oncelikPuaniHesapla();
                     h.muayeneSuresiHesapla();
-                    h.setMuayeneSaati(muayeneSaati);
+
+                    // Muayene saati hesaplama
+                    if (!HastaHeap.bosMu()) {
+                        Hasta sonHasta = HastaHeap.peek();
+                        double sonHastaBitisSaati = sonHasta.getMuayeneSaati() + (sonHasta.getMuayeneSuresi() / 60.0);
+                        h.setMuayeneSaati(sonHastaBitisSaati);  // Yeni hasta muayene saati, önceki hastanın bitiş saati olmalı
+                    } else {
+                        h.setMuayeneSaati(h.hastaKayitSaati);  // İlk hasta, kayıt saatiyle başlasın
+                    }
+
+                    System.out.println(h.hastaAdi + "    " + h.muayeneSaati + "      " + h.hastaKayitSaati);
                     HastaHeap.ekle(h);
-                    guncelleMuayeneSaati(h.getMuayeneSuresi());
+                    guncelleMuayeneSaati(h.getMuayeneSuresi(),h.hastaKayitSaati);
                     iterator.remove();
                 }
             }
@@ -88,6 +97,7 @@ public class HelloController {
                 }
             }
 
+            // Şu anda muayene yapan hastayı göster
             if (!HastaHeap.bosMu()) {
                 Hasta suankiHasta = HastaHeap.peek();
                 double baslangicSaati = suankiHasta.getMuayeneSaati();
@@ -116,16 +126,25 @@ public class HelloController {
         clock.play();
     }
 
+
     private double getCurrentDoubleTime() {
         LocalTime time = LocalTime.now();
         return time.getHour() + (time.getMinute() / 60.0);  // Dakikayı doğru şekilde 60'a bölüyoruz
     }
 
 
-    private void guncelleMuayeneSaati(int ekSure) {
+    private void guncelleMuayeneSaati(int ekSure, double hastaKayitSaati) {
         // Mevcut saati saat ve dakika olarak ayırıyoruz
         int saat = (int) muayeneSaati;
-        int dakika = (int) Math.round((muayeneSaati - saat) * 60);  // ondalıklı kısmı dakikaya çeviriyoruz
+        int dakika = (int) Math.round((muayeneSaati - saat) * 60);  // Ondalıklı kısmı dakikaya çeviriyoruz
+
+        // Muayene saati kayıttan önce olmamalıdır, kontrol ekliyoruz
+        if (muayeneSaati < hastaKayitSaati) {
+            // Eğer muayene saati, hasta kayıt saatinden önce ise, muayene saatini kayıt saatine eşit yapıyoruz
+            muayeneSaati = hastaKayitSaati;
+            saat = (int) muayeneSaati;
+            dakika = (int) Math.round((muayeneSaati - saat) * 60);
+        }
 
         // Muayene süresi ekleyerek yeni saati hesaplıyoruz
         int toplamDakika = dakika + ekSure;
@@ -135,6 +154,8 @@ public class HelloController {
         // Yeni saati double formatında güncelliyoruz
         muayeneSaati = saat + (dakika / 60.0);  // Saat + dakika / 60 şeklinde
     }
+
+
 
 
     public void verileriHazirla() {
@@ -153,14 +174,15 @@ public class HelloController {
                     String kanama = parcalar[6].trim().toLowerCase();
                     double kayitSaati = Double.parseDouble(parcalar[7].trim().replace(",", "."));
 
-
-                        Hasta hasta = new Hasta(ad, yas, cinsiyet, mahkum, engelli, kanama, kayitSaati);
-                        bekleyenHastalar.add(hasta);
-
+                    Hasta hasta = new Hasta(ad, yas, cinsiyet, mahkum, engelli, kanama, kayitSaati);
+                    bekleyenHastalar.add(hasta);
                 }
             }
 
-            System.out.println("Bekleyen hastalar yüklendi: " + bekleyenHastalar.size());
+            // Kayıt saatlerine göre sıralama (küçükten büyüğe)
+            Collections.sort(bekleyenHastalar, Comparator.comparingDouble(Hasta::getHastaKayitSaati));
+
+            System.out.println("Bekleyen hastalar yüklendi ve sıralandı: " + bekleyenHastalar.size());
 
         } catch (Exception e) {
             System.err.println("Veriler okunurken hata oluştu: " + e.getMessage());
@@ -200,6 +222,11 @@ public class HelloController {
                 saat = sonHasta.getMuayeneSaati() + (sonHasta.getMuayeneSuresi() / 60.0); // Bir önceki hastanın bitiş saati
             }
 
+            // Kayıt saatinin, muayene saatinden önce olamayacağını kontrol et
+            if (saat < Double.parseDouble(txtSaat.getText())) {
+                throw new IllegalArgumentException("Muayene saati, kayıt saatinden önce olamaz.");
+            }
+
             Hasta yeniHasta = new Hasta(ad, yas, cinsiyet, mahkum, engelli, kanama, saat);
             bekleyenHastalar.add(yeniHasta);
 
@@ -209,6 +236,7 @@ public class HelloController {
             lblSonuc.setText("Hata: " + e.getMessage());
         }
     }
+
 
     @FXML
     private void tumHastalariGoster() throws IOException {

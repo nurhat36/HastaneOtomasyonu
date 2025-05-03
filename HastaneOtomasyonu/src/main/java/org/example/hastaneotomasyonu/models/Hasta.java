@@ -76,9 +76,19 @@ public class Hasta implements Comparable<Hasta> {
         return muayeneSaati;
     }
 
-    public void setMuayeneSaati(double saat) {
-        this.muayeneSaati = saat;
+    public void setMuayeneSaati(double yeniMuayeneSaati) {
+        // Eğer yeni muayene saati, hasta kayıt saatinden önce ise, hata fırlatıyoruz
+        if (yeniMuayeneSaati < hastaKayitSaati) {
+            throw new IllegalArgumentException("Muayene saati (" + yeniMuayeneSaati + ") kayıt saatinden önce olamaz. Kayıt Saati: " + hastaKayitSaati);
+        }
+        this.muayeneSaati = yeniMuayeneSaati;
     }
+    public double getHastaKayitSaati() {
+        return this.hastaKayitSaati;
+    }
+
+
+
 
 
 
