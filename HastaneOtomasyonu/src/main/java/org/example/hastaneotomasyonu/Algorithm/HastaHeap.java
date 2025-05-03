@@ -14,6 +14,18 @@ public class HastaHeap {
         this.size = 0;
         this.heap = new Hasta[capacity];
     }
+    public Hasta peekNext() {
+        if (size <= 1) {
+            return null;
+        }
+        // root hariç en yüksek öncelikli 2. hastayı bul
+        int nextIndex = 1;
+        if (size > 2 && heap[2].getOncelikPuani() > heap[1].getOncelikPuani()) {
+            nextIndex = 2;
+        }
+        return heap[nextIndex];
+    }
+
 
     public void ekle(Hasta hasta) {
         if (size == capacity) {
@@ -36,11 +48,17 @@ public class HastaHeap {
 
         Hasta root = heap[0];
         heap[0] = heap[size - 1];
+        heap[size - 1] = null;  // önemli
         size--;
         asagiTasima(0);
 
         return root;
     }
+    public Hasta peek() {
+        return size == 0 ? null : heap[0];
+    }
+
+
 
     private void yukariTasima(int index) {
         while (index > 0) {
