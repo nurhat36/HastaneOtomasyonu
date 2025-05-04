@@ -43,7 +43,7 @@ public class HeapViewController {
         // Yazı ekle
         gc.setFill(Color.BLACK);
         gc.setFont(Font.font(12));
-        String text = hasta.getOncelikPuani() + "\n" + hasta.hastaAdi;
+        String text = hasta.getOncelikPuani() + "\n" + hasta.hastaAdi+"\n"+hasta.muayeneSaati;
         gc.fillText(text, x - 25, y - 10);
 
         // Sol çocuk

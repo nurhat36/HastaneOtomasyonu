@@ -1,7 +1,10 @@
 package org.example.hastaneotomasyonu.Algorithm;
 
 import org.example.hastaneotomasyonu.models.Hasta;
+
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class HastaHeap {
@@ -95,7 +98,63 @@ public class HastaHeap {
         }
 
         size++;
+        guncelleMuayeneSaatleri(); // ekledikten sonra saatleri güncelle
+
     }
+    private void guncelleMuayeneSaatleri() {
+        if (root == null) return;
+
+        List<Node> siraliHastaListesi = new ArrayList<>();
+        Queue<Node> queue = new LinkedList<>();
+        queue.add(root);
+
+        while (!queue.isEmpty()) {
+            Node current = queue.poll();
+            siraliHastaListesi.add(current);
+
+            if (current.left != null) queue.add(current.left);
+            if (current.right != null) queue.add(current.right);
+        }
+
+        // Öncelik puanına göre sırala (yüksek öncelik önce)
+        siraliHastaListesi.sort((n1, n2) -> Integer.compare(n2.data.getOncelikPuani(), n1.data.getOncelikPuani()));
+
+        int dakikaCinsindenBaslangic = 9 * 60; // 09:00
+
+        for (Node node : siraliHastaListesi) {
+            Hasta hasta = node.data;
+
+            // Hastanın kayıt saatini dakika cinsine çevir
+            int kayitDakika = saatDoubleToDakika(hasta.hastaKayitSaati);
+
+            // Başlangıç saati, kayıt saatinden küçükse, hastayı sıraya geç al
+            if (dakikaCinsindenBaslangic < kayitDakika) {
+                dakikaCinsindenBaslangic = kayitDakika;
+            }
+
+            hasta.setMuayeneSaati(dakikaToSaatDouble(dakikaCinsindenBaslangic));
+
+            // Sonraki hastanın saati bu hastanın süresinden sonra başlasın
+            dakikaCinsindenBaslangic += hasta.getMuayeneSuresi();
+        }
+    }
+
+    // Dakikayı saat.dakika (double) türüne çevirir
+    private double dakikaToSaatDouble(int dakika) {
+        int saat = dakika / 60;
+        int kalanDakika = dakika % 60;
+        return saat + (kalanDakika / 100.0);
+    }
+
+    // saat.dakika double değerini dakika cinsinden döndürür (örn: 10.30 → 630)
+    private int saatDoubleToDakika(double saatDouble) {
+        int saat = (int) saatDouble;
+        int dakika = (int) Math.round((saatDouble - saat) * 100); // örn: 0.03 → 3 dakika
+        return saat * 60 + dakika;
+    }
+
+
+
 
     // Kök öğeyi çıkart (max heap olduğu için root çıkar)
     public Hasta cikar() {

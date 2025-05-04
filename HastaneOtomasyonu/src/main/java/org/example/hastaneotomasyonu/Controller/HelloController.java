@@ -90,7 +90,7 @@ public class HelloController {
                         h.setMuayeneSaati(h.hastaKayitSaati);
                     }
 
-                    System.out.println(h.hastaAdi + "    " + h.muayeneSaati + "      " + h.hastaKayitSaati);
+                    System.out.println(h.hastaAdi + "    " + h.muayeneSaati + "      " + h.hastaKayitSaati+"    " +h.muayeneSuresi);
 
                     HastaHeap.ekle(h);
                     guncelleMuayeneSaati(h.getMuayeneSuresi(), h.hastaKayitSaati);
@@ -102,7 +102,7 @@ public class HelloController {
             // Muayenesi biten hastayı çıkar
             if (!HastaHeap.bosMu()) {
                 Hasta enOncelikli = HastaHeap.peek();
-                double bitisZamani = enOncelikli.getMuayeneSaati() + (enOncelikli.getMuayeneSuresi() / 60.0);
+                double bitisZamani = saatTopla(enOncelikli.getMuayeneSaati(),enOncelikli.getMuayeneSuresi());
                 if (currentTime >= bitisZamani) {
                     Hasta cikan = HastaHeap.cikar();
                     System.out.println("Muayenesi biten: " + cikan.hastaAdi);
