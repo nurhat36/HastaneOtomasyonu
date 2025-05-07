@@ -2,161 +2,64 @@ package org.example.hastaneotomasyonu.Algorithm;
 
 import org.example.hastaneotomasyonu.models.Hasta;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 public class HastaHeap {
     private Node root;
     private int size;
 
-    // Node sınıfı
     public class Node {
         Hasta data;
-        Node left;
-        Node right;
-        Node parent;
+        Node left, right, parent;
 
         Node(Hasta data) {
             this.data = data;
         }
 
-        public Hasta getData() {
-            return data;
-        }
-
-        public Node getLeft() {
-            return left;
-        }
-
-        public Node getRight() {
-            return right;
-        }
-
-        public Node getParent() {
-            return parent;
-        }
+        public Hasta getData() { return data; }
+        public Node getLeft() { return left; }
+        public Node getRight() { return right; }
+        public Node getParent() { return parent; }
     }
 
-    // Constructor
     public HastaHeap() {
-        this.root = null;
-        this.size = 0;
+        root = null;
+        size = 0;
     }
 
-    // Root'u döndür
-    public Node getRoot() {
-        return root;
-    }
+    public Node getRoot() { return root; }
+    public boolean bosMu() { return size == 0; }
+    public int boyut() { return size; }
+    public Hasta peek() { return root != null ? root.data : null; }
 
-    // Heap'in boş olup olmadığını kontrol et
-    public boolean bosMu() {
-        return size == 0;
-    }
 
-    // Heap'in boyutunu döndür
-    public int boyut() {
-        return size;
-    }
 
-    // Kök öğeyi (root) döndür
-    public Hasta peek() {
-        return root != null ? root.data : null;
-    }
+    private Node findParentForNewNode() {
+        if (root == null) return null;
 
-    // Hasta ekle
-    public void ekle(Hasta hasta) {
-        Node newNode = new Node(hasta);
-
-        if (root == null) {
-            root = newNode;
-        } else {
-            Queue<Node> queue = new LinkedList<>();
-            queue.add(root);
-
-            // En son boş yer bulunur ve hasta eklenir
-            while (!queue.isEmpty()) {
-                Node current = queue.poll();
-
-                if (current.left == null) {
-                    current.left = newNode;
-                    newNode.parent = current;
-                    break;
-                } else if (current.right == null) {
-                    current.right = newNode;
-                    newNode.parent = current;
-                    break;
-                } else {
-                    queue.add(current.left);
-                    queue.add(current.right);
-                }
-            }
-
-            // Yukarı taşıma (heap property)
-            yukariTasima(newNode);
-        }
-
-        size++;
-        guncelleMuayeneSaatleri(); // ekledikten sonra saatleri güncelle
-
-    }
-    private void guncelleMuayeneSaatleri() {
-        if (root == null) return;
-
-        List<Node> siraliHastaListesi = new ArrayList<>();
         Queue<Node> queue = new LinkedList<>();
         queue.add(root);
 
         while (!queue.isEmpty()) {
             Node current = queue.poll();
-            siraliHastaListesi.add(current);
 
-            if (current.left != null) queue.add(current.left);
-            if (current.right != null) queue.add(current.right);
-        }
-
-        // Öncelik puanına göre sırala (yüksek öncelik önce)
-        siraliHastaListesi.sort((n1, n2) -> Integer.compare(n2.data.getOncelikPuani(), n1.data.getOncelikPuani()));
-
-        int dakikaCinsindenBaslangic = 9 * 60; // 09:00
-
-        for (Node node : siraliHastaListesi) {
-            Hasta hasta = node.data;
-
-            // Hastanın kayıt saatini dakika cinsine çevir
-            int kayitDakika = saatDoubleToDakika(hasta.hastaKayitSaati);
-
-            // Başlangıç saati, kayıt saatinden küçükse, hastayı sıraya geç al
-            if (dakikaCinsindenBaslangic < kayitDakika) {
-                dakikaCinsindenBaslangic = kayitDakika;
+            if (current.left == null || current.right == null) {
+                return current;
             }
 
-            hasta.setMuayeneSaati(dakikaToSaatDouble(dakikaCinsindenBaslangic));
+            queue.add(current.left);
+            queue.add(current.right);
+        }
+        return null;
+    }
 
-            // Sonraki hastanın saati bu hastanın süresinden sonra başlasın
-            dakikaCinsindenBaslangic += hasta.getMuayeneSuresi();
+    private void yukariTasima(Node node) {
+        while (node.parent != null && node.data.compareTo(node.parent.data) > 0) {
+            swap(node, node.parent);
+            node = node.parent;
         }
     }
 
-    // Dakikayı saat.dakika (double) türüne çevirir
-    private double dakikaToSaatDouble(int dakika) {
-        int saat = dakika / 60;
-        int kalanDakika = dakika % 60;
-        return saat + (kalanDakika / 100.0);
-    }
-
-    // saat.dakika double değerini dakika cinsinden döndürür (örn: 10.30 → 630)
-    private int saatDoubleToDakika(double saatDouble) {
-        int saat = (int) saatDouble;
-        int dakika = (int) Math.round((saatDouble - saat) * 100); // örn: 0.03 → 3 dakika
-        return saat * 60 + dakika;
-    }
-
-
-
-
-    // Kök öğeyi çıkart (max heap olduğu için root çıkar)
     public Hasta cikar() {
         if (root == null) return null;
 
@@ -168,44 +71,30 @@ public class HastaHeap {
             return maxValue;
         }
 
-        // En son düğüm alınır ve root ile takas yapılır
         Node lastNode = getLastNode();
+
+        // Kök ile son düğümün verisini değiştir
         root.data = lastNode.data;
 
-        // Last node silinir
-        if (lastNode.parent.right == lastNode) {
-            lastNode.parent.right = null;
-        } else {
-            lastNode.parent.left = null;
+        // Son düğümü kaldır
+        if (lastNode.parent != null) {
+            if (lastNode.parent.left == lastNode) {
+                lastNode.parent.left = null;
+            } else {
+                lastNode.parent.right = null;
+            }
         }
 
         size--;
-        // Aşağı taşıma (heap property)
         asagiTasima(root);
+        guncelleMuayeneSaatleri();
 
         return maxValue;
     }
 
-    // Yukarı taşıma (heap property)
-    private void yukariTasima(Node node) {
-        while (node.parent != null && node.data.compareTo(node.parent.data) > 0) {
-            swap(node, node.parent);
-            node = node.parent;
-        }
-    }
-
-    // Aşağı taşıma (heap property)
     private void asagiTasima(Node node) {
         while (node != null) {
-            Node maxChild = null;
-
-            if (node.left != null && node.right != null) {
-                maxChild = (node.left.data.compareTo(node.right.data) > 0) ? node.left : node.right;
-            } else if (node.left != null) {
-                maxChild = node.left;
-            } else if (node.right != null) {
-                maxChild = node.right;
-            }
+            Node maxChild = getMaxChild(node);
 
             if (maxChild != null && maxChild.data.compareTo(node.data) > 0) {
                 swap(node, maxChild);
@@ -216,15 +105,32 @@ public class HastaHeap {
         }
     }
 
-    // İki düğümün verilerini takas yapma
+    private Node getMaxChild(Node node) {
+        if (node == null) return null;
+
+        Node maxChild = null;
+        if (node.left != null) {
+            maxChild = node.left;
+        }
+
+        if (node.right != null) {
+            if (maxChild == null || node.right.data.compareTo(maxChild.data) > 0) {
+                maxChild = node.right;
+            }
+        }
+
+        return maxChild;
+    }
+
     private void swap(Node a, Node b) {
         Hasta temp = a.data;
         a.data = b.data;
         b.data = temp;
     }
 
-    // En son eklenen düğümü bulma
     private Node getLastNode() {
+        if (root == null) return null;
+
         Queue<Node> queue = new LinkedList<>();
         queue.add(root);
         Node last = null;
@@ -238,32 +144,93 @@ public class HastaHeap {
         return last;
     }
 
-    // En yüksek öncelikli ikinci hastayı bulma
-    public Hasta peekNext() {
+    private void guncelleMuayeneSaatleri() {
+        if (root == null) return;
+
+        // Heap'teki tüm hastaları topla (sırasız)
+        List<Hasta> hastalar = new ArrayList<>();
         Queue<Node> queue = new LinkedList<>();
-        queue.add(root);
-        Hasta first = root != null ? root.data : null;
-        Hasta second = null;
+        if (root != null) queue.add(root);
 
         while (!queue.isEmpty()) {
             Node current = queue.poll();
-
-            if (current != root) {
-                if (second == null || current.data.getOncelikPuani() > second.getOncelikPuani()) {
-                    second = current.data;
-                }
-            }
-
+            hastalar.add(current.data);
             if (current.left != null) queue.add(current.left);
             if (current.right != null) queue.add(current.right);
         }
 
-        return second;
+        // Öncelik sırasına göre sırala (büyükten küçüğe)
+        hastalar.sort((h1, h2) -> Integer.compare(h2.getOncelikPuani(), h1.getOncelikPuani()));
+
+        int dakikaCinsindenBaslangic = 9 * 60; // 09:00
+
+        for (Hasta hasta : hastalar) {
+            int kayitDakika = saatDoubleToDakika(hasta.hastaKayitSaati);
+
+            if (dakikaCinsindenBaslangic < kayitDakika) {
+                dakikaCinsindenBaslangic = kayitDakika;
+            }
+
+            hasta.setMuayeneSaati(dakikaToSaatDouble(dakikaCinsindenBaslangic));
+            dakikaCinsindenBaslangic += hasta.getMuayeneSuresi();
+        }
     }
 
-    // Tüm hastaları döndür
+    public void ekle(Hasta hasta) {
+        Node newNode = new Node(hasta);
+        size++;
+
+        if (root == null) {
+            root = newNode;
+        } else {
+            Node parent = findParentForNewNode();
+            if (parent.left == null) {
+                parent.left = newNode;
+            } else {
+                parent.right = newNode;
+            }
+            newNode.parent = parent;
+
+            yukariTasima(newNode);
+        }
+
+        // Sadece ekleme işlemi tamamlandığında bir kez çağır
+        // Artık recursive çağrı yok
+        if (size > 1) {
+            guncelleMuayeneSaatleri();
+        }
+    }
+
+    private double dakikaToSaatDouble(int dakika) {
+        int saat = dakika / 60;
+        int kalanDakika = dakika % 60;
+        return saat + (kalanDakika / 100.0);
+    }
+
+    private int saatDoubleToDakika(double saatDouble) {
+        int saat = (int) saatDouble;
+        int dakika = (int) Math.round((saatDouble - saat) * 100);
+        return saat * 60 + dakika;
+    }
+
+    public Hasta peekNext() {
+        if (size <= 1) return null;
+
+        // İkinci en yüksek öncelikli hasta ya sol ya da sağ çocuktur
+        if (root.left != null && root.right != null) {
+            return root.left.data.compareTo(root.right.data) > 0 ?
+                    root.left.data : root.right.data;
+        } else if (root.left != null) {
+            return root.left.data;
+        } else {
+            return root.right.data;
+        }
+    }
+
     public Hasta[] getTumHastalar() {
         Hasta[] hastalar = new Hasta[size];
+        if (root == null) return hastalar;
+
         Queue<Node> queue = new LinkedList<>();
         queue.add(root);
         int i = 0;
@@ -276,6 +243,32 @@ public class HastaHeap {
             if (current.right != null) queue.add(current.right);
         }
 
+        // Heap sıralamasına göre değil, seviye sıralamasına göre verir
+        // Eğer sıralı istiyorsanız ayrıca sıralama yapmalısınız
         return hastalar;
+    }
+
+    // Heap'in doğru çalışıp çalışmadığını kontrol etmek için yardımcı metod
+    public boolean isValid() {
+        return isValid(root);
+    }
+
+    private boolean isValid(Node node) {
+        if (node == null) return true;
+
+        boolean leftValid = true;
+        boolean rightValid = true;
+
+        if (node.left != null) {
+            if (node.data.compareTo(node.left.data) < 0) return false;
+            leftValid = isValid(node.left);
+        }
+
+        if (node.right != null) {
+            if (node.data.compareTo(node.right.data) < 0) return false;
+            rightValid = isValid(node.right);
+        }
+
+        return leftValid && rightValid;
     }
 }
