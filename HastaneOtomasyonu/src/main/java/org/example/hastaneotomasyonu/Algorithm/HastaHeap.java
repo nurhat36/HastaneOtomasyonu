@@ -32,25 +32,23 @@ public class HastaHeap {
     public int boyut() { return size; }
     public Hasta peek() { return root != null ? root.data : null; }
 
-
-
     private Node findParentForNewNode() {
         if (root == null) return null;
 
-        Queue<Node> queue = new LinkedList<>();
-        queue.add(root);
+        int temp = size + 1;
+        String path = Integer.toBinaryString(temp).substring(1);
 
-        while (!queue.isEmpty()) {
-            Node current = queue.poll();
-
-            if (current.left == null || current.right == null) {
-                return current;
+        Node current = root;
+        for (char c : path.toCharArray()) {
+            if (c == '0') {
+                if (current.left == null) break;
+                current = current.left;
+            } else {
+                if (current.right == null) break;
+                current = current.right;
             }
-
-            queue.add(current.left);
-            queue.add(current.right);
         }
-        return null;
+        return current;
     }
 
     private void yukariTasima(Node node) {
@@ -147,32 +145,34 @@ public class HastaHeap {
     private void guncelleMuayeneSaatleri() {
         if (root == null) return;
 
-        // Heap'teki tüm hastaları topla (sırasız)
-        List<Hasta> hastalar = new ArrayList<>();
+        // Get all patients in the heap (not in order)
+        List<Hasta> allPatients = new ArrayList<>();
         Queue<Node> queue = new LinkedList<>();
         if (root != null) queue.add(root);
 
         while (!queue.isEmpty()) {
             Node current = queue.poll();
-            hastalar.add(current.data);
+            allPatients.add(current.data);
             if (current.left != null) queue.add(current.left);
             if (current.right != null) queue.add(current.right);
         }
 
-        // Öncelik sırasına göre sırala (büyükten küçüğe)
-        hastalar.sort((h1, h2) -> Integer.compare(h2.getOncelikPuani(), h1.getOncelikPuani()));
+        // Sort by priority (highest first)
+        allPatients.sort((h1, h2) -> Integer.compare(h2.getOncelikPuani(), h1.getOncelikPuani()));
 
-        int dakikaCinsindenBaslangic = 9 * 60; // 09:00
+        // Calculate examination times
+        int currentTime = 9 * 60; // Start at 09:00
 
-        for (Hasta hasta : hastalar) {
-            int kayitDakika = saatDoubleToDakika(hasta.hastaKayitSaati);
+        for (Hasta hasta : allPatients) {
+            int registrationTime = saatDoubleToDakika(hasta.hastaKayitSaati);
 
-            if (dakikaCinsindenBaslangic < kayitDakika) {
-                dakikaCinsindenBaslangic = kayitDakika;
+            // Doctor can't see patient before registration time
+            if (currentTime < registrationTime) {
+                currentTime = registrationTime;
             }
 
-            hasta.setMuayeneSaati(dakikaToSaatDouble(dakikaCinsindenBaslangic));
-            dakikaCinsindenBaslangic += hasta.getMuayeneSuresi();
+            hasta.setMuayeneSaati(dakikaToSaatDouble(currentTime));
+            currentTime += hasta.getMuayeneSuresi();
         }
     }
 
@@ -194,11 +194,7 @@ public class HastaHeap {
             yukariTasima(newNode);
         }
 
-        // Sadece ekleme işlemi tamamlandığında bir kez çağır
-        // Artık recursive çağrı yok
-        if (size > 1) {
-            guncelleMuayeneSaatleri();
-        }
+        guncelleMuayeneSaatleri();
     }
 
     private double dakikaToSaatDouble(int dakika) {
@@ -216,7 +212,6 @@ public class HastaHeap {
     public Hasta peekNext() {
         if (size <= 1) return null;
 
-        // İkinci en yüksek öncelikli hasta ya sol ya da sağ çocuktur
         if (root.left != null && root.right != null) {
             return root.left.data.compareTo(root.right.data) > 0 ?
                     root.left.data : root.right.data;
@@ -231,24 +226,24 @@ public class HastaHeap {
         Hasta[] hastalar = new Hasta[size];
         if (root == null) return hastalar;
 
+        // Get all patients (not in order)
+        List<Hasta> allPatients = new ArrayList<>();
         Queue<Node> queue = new LinkedList<>();
         queue.add(root);
-        int i = 0;
 
         while (!queue.isEmpty()) {
             Node current = queue.poll();
-            hastalar[i++] = current.data;
-
+            allPatients.add(current.data);
             if (current.left != null) queue.add(current.left);
             if (current.right != null) queue.add(current.right);
         }
 
-        // Heap sıralamasına göre değil, seviye sıralamasına göre verir
-        // Eğer sıralı istiyorsanız ayrıca sıralama yapmalısınız
-        return hastalar;
+        // Sort by priority (highest first)
+        allPatients.sort((h1, h2) -> Integer.compare(h2.getOncelikPuani(), h1.getOncelikPuani()));
+
+        return allPatients.toArray(hastalar);
     }
 
-    // Heap'in doğru çalışıp çalışmadığını kontrol etmek için yardımcı metod
     public boolean isValid() {
         return isValid(root);
     }
