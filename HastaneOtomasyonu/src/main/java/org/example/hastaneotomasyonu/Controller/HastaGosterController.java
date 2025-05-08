@@ -9,6 +9,8 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import org.example.hastaneotomasyonu.Algorithm.HastaHeap;
 import org.example.hastaneotomasyonu.models.Hasta;
 
+import java.util.List;
+
 public class HastaGosterController {
     @FXML private TableView<Hasta> tableView;
     @FXML private TableColumn<Hasta, String> adiColumn;
@@ -24,10 +26,13 @@ public class HastaGosterController {
         sureColumn.setCellValueFactory(new PropertyValueFactory<>("muayeneSuresi"));
 
         // Örnek veriler doğru constructor ile oluşturulmalı
-        HastaHeap heap = HelloController.HastaHeap; // bu satırı kendi yapına göre güncelle
+        HastaHeap heap = HelloController.HastaHeap;
 
-        // Hasta[] -> ObservableList'e dönüşüm
-        ObservableList<Hasta> veri = FXCollections.observableArrayList(heap.getTumHastalar());
+        // Heap içindeki tüm hastaları çek (liste olarak)
+        List<Hasta> hastaListesi = List.of(heap.getTumHastalar());
+
+        // ObservableList'e dönüştür
+        ObservableList<Hasta> veri = FXCollections.observableArrayList(hastaListesi);
 
         // Tabloya veriyi bağla
         tableView.setItems(veri);
