@@ -85,7 +85,7 @@ public class HastaHeap {
 
         size--;
         asagiTasima(root);
-        guncelleMuayeneSaatleri();
+
 
         return maxValue;
     }

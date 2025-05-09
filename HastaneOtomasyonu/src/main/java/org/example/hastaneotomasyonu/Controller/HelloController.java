@@ -45,7 +45,17 @@ public class HelloController {
     public static HastaHeap HastaHeap;
     private List<Hasta> bekleyenHastalar = new ArrayList<>();
     private double muayeneSaati = 9.00;
-    private double baslangicSaati = 9.00; // Her zaman 9:00'da başlasın
+    private double baslangicSaati = 9.00;
+
+    private Hasta muayenedekiHasta = null;
+    private double muayeneBitisSaati = 0.0;
+    private double simuleEdilenZaman = 8.00; // Sabah 8:00'de başlar
+    private double zamanHizi = 3.0; // 1.0 = gerçek zaman, 2.0 = 2x hızında vs.
+    private Timeline simulationTimeline;
+
+    private double getCurrentDoubleTime() {
+        return simuleEdilenZaman;
+    }
 
     @FXML
     public void initialize() {
@@ -55,133 +65,249 @@ public class HelloController {
         comboCinsiyet.getItems().addAll("Erkek", "Kadın", "Diğer");
         comboKanama.getItems().addAll("Yok", "Kanama", "AgirKanama");
 
+        double currentTime = getCurrentDoubleTime();
+        processPastPatients(currentTime);
+
+        setupDynamicTimeline();
+        startSimulationTimeline();
+    }
+    private void startSimulationTimeline() {
+        simulationTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+            // Zamanı ilerlet (her saniyede 1 dakika ileri gidecek şekilde)
+            simuleEdilenZaman += (1.0 / 60.0) * zamanHizi;
+
+            // 24 saatlik döngü sağla
+            if (simuleEdilenZaman >= 24.00) {
+                simuleEdilenZaman -= 24.00;
+            }
+
+            // Sistem güncellemelerini yap
+            updateSystem();
+        }));
+        simulationTimeline.setCycleCount(Timeline.INDEFINITE);
+        simulationTimeline.play();
+    }
+
+    private void updateSystem() {
+        lblSonuc.setText("Simüle Edilen Zaman: " + doubleToSaatDakika(simuleEdilenZaman));
+
+        // Diğer sistem güncellemeleri
+        processNewPatients(simuleEdilenZaman);
+        checkCurrentExamination(simuleEdilenZaman);
+        displayCurrentExaminationStatus(simuleEdilenZaman);
+    }
+
+    private void setupDynamicTimeline() {
         Timeline clock = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
             ClockService.updateTime();
             lblSonuc.setText(ClockService.getCurrentTime());
 
             double currentTime = getCurrentDoubleTime();
 
-            Iterator<Hasta> iterator = bekleyenHastalar.iterator();
-            System.out.println("hasta adi      " + "muayene saati        " + "hasta kaıt saati");
+            // 1. Muayenedeki hastanın durumunu kontrol et
+            checkCurrentExamination(currentTime);
 
-            while (iterator.hasNext()) {
-                Hasta h = iterator.next();
+            // 2. Yeni hastaları işle (muayenede hasta yoksa veya muayene bittiyse)
+            if (muayenedekiHasta == null || currentTime >= muayeneBitisSaati) {
+                processNewPatients(currentTime);
 
-                if (h.hastaKayitSaati >= 8.00 && h.hastaKayitSaati <= currentTime) {
-                    h.oncelikPuaniHesapla();
-                    h.muayeneSuresiHesapla();
-
-
-                    // 🔄 Muayene saati hesaplama (önceki tüm hastaların bitiş zamanına göre)
-                    double enSonBitisSaati = 0.0;
-
-                    if (!HastaHeap.bosMu()) {
-                        for (Hasta heapHastasi : HastaHeap.getTumHastalar()) {
-
-
-                            double bitisSaati = saatTopla(heapHastasi.getMuayeneSaati() , heapHastasi.getMuayeneSuresi() );
-                            if (bitisSaati > enSonBitisSaati) {
-                                enSonBitisSaati = bitisSaati;
-                            }
-                        }
-                        System.out.println(Math.max(h.hastaKayitSaati, enSonBitisSaati)+"  "+h.hastaKayitSaati+"  "+enSonBitisSaati);
-                        h.setMuayeneSaati(Math.max(h.hastaKayitSaati, enSonBitisSaati));
-                    } else {
-                        h.setMuayeneSaati(h.hastaKayitSaati);
-                    }
-
-                    System.out.println(h.hastaAdi + "    " + h.muayeneSaati + "      " + h.hastaKayitSaati+"    " +h.muayeneSuresi);
-
-                    HastaHeap.ekle(h);
-                    guncelleMuayeneSaati(h.getMuayeneSuresi(), h.hastaKayitSaati);
-
-                    iterator.remove();
-                }
             }
 
-            // Muayenesi biten hastayı çıkar
-            if (!HastaHeap.bosMu()) {
-                Hasta enOncelikli = HastaHeap.peek();
-                double bitisZamani = saatTopla(enOncelikli.getMuayeneSaati(),enOncelikli.getMuayeneSuresi());
-                if (currentTime >= bitisZamani) {
-                    Hasta cikan = HastaHeap.cikar();
-                    System.out.println("Muayenesi biten: " + cikan.hastaAdi);
-                }
+            // 3. Muayene için yeni hasta al
+            if (muayenedekiHasta == null && !HastaHeap.bosMu()) {
+                startNewExamination(currentTime);
+
             }
 
-            // Şu anda muayene olan hasta
-            if (!HastaHeap.bosMu()) {
-                Hasta suankiHasta = HastaHeap.peek();
-                double baslangicSaati = suankiHasta.getMuayeneSaati();
-                double bitisSaati = saatTopla(baslangicSaati, suankiHasta.getMuayeneSuresi());
-
-                System.out.println("🔵 Şu anda muayenede: " + suankiHasta.hastaAdi+"   "+suankiHasta.hastaKayitSaati);
-                System.out.printf("   Başlangıç Saati: %.2f%n", baslangicSaati);
-                System.out.printf("   Bitiş Saati    : %.2f%n", bitisSaati);
-
-                if (HastaHeap.boyut() > 1) {
-                    Hasta siradakiHasta = HastaHeap.peekNext(); // bu metodu senin yazman gerekir
-                    double siradakiBaslangic = bitisSaati;
-                    double siradakiBitis = siradakiBaslangic + (siradakiHasta.getMuayeneSuresi() / 60.0);
-
-                    System.out.println("🟡 Sıradaki hasta: " + siradakiHasta.hastaAdi);
-                    System.out.printf("   Tahmini Başlangıç: %.2f%n", siradakiBaslangic);
-                    System.out.printf("   Tahmini Bitiş    : %.2f%n", siradakiBitis);
-                } else {
-                    System.out.println("🟢 Sıradaki hasta yok.");
-                }
-            }
-
+            // 4. Durum bilgilerini göster
+            displayCurrentExaminationStatus(currentTime);
         }));
 
         clock.setCycleCount(Timeline.INDEFINITE);
         clock.play();
     }
+
+    private void checkCurrentExamination(double currentTime) {
+        if (muayenedekiHasta != null && currentTime >= muayeneBitisSaati) {
+            System.out.println("✅ Muayenesi biten: " + muayenedekiHasta.hastaAdi +
+                    " (Bitiş: " + muayeneBitisSaati + ")");
+            muayenedekiHasta = null;
+        }
+    }
+
+
+
+    private void processNewPatients(double currentTime) {
+        Iterator<Hasta> iterator = bekleyenHastalar.iterator();
+        while (iterator.hasNext()) {
+            Hasta h = iterator.next();
+            if (h.hastaKayitSaati <= currentTime) {
+                h.oncelikPuaniHesapla();
+                h.muayeneSuresiHesapla();
+
+                // Muayene saati = max(kayıt saati, son muayene bitiş saati)
+                double sonBitis = (muayenedekiHasta != null) ? muayeneBitisSaati :
+                        calculateLastFinishTime();
+                h.setMuayeneSaati(Math.max(h.hastaKayitSaati, sonBitis));
+
+                HastaHeap.ekle(h);
+                iterator.remove();
+            }
+        }
+    }
+
+    private void displayCurrentExaminationStatus(double currentTime) {
+        if (muayenedekiHasta != null) {
+            System.out.println("🔵 Şu anda muayenede: " + muayenedekiHasta.hastaAdi);
+            System.out.printf("   Başlangıç: %.2f, Bitiş: %.2f%n",
+                    muayenedekiHasta.getMuayeneSaati(), muayeneBitisSaati);
+
+            // Sıradaki hasta bilgisi
+            if (!HastaHeap.bosMu()) {
+                Hasta siradaki = HastaHeap.peek();
+                System.out.println("🟡 Sıradaki: " + siradaki.hastaAdi +
+                        " (Başlangıç: " + siradaki.getMuayeneSaati() + ")");
+            }
+        } else if (!HastaHeap.bosMu()) {
+            Hasta ilkHasta = HastaHeap.peek();
+            System.out.println("⏳ Bekleyen hasta: " + ilkHasta.hastaAdi +
+                    " (Muayene Başlangıç: " + ilkHasta.getMuayeneSaati() + ")");
+        }
+    }
+
+    private void processPastPatients(double currentTime) {
+        Iterator<Hasta> iterator = bekleyenHastalar.iterator();
+        double enSonBitisSaati = 0.0;
+
+        while (iterator.hasNext()) {
+            Hasta h = iterator.next();
+
+            if (h.hastaKayitSaati >= 8.00 && h.hastaKayitSaati <= currentTime) {
+                processPatient(h, currentTime);
+                iterator.remove();
+            }
+        }
+    }
+
+
+
+    private void processPatient(Hasta h, double currentTime) {
+        h.oncelikPuaniHesapla();
+        h.muayeneSuresiHesapla();
+
+        // Muayene başlangıç saatini doğru şekilde hesapla
+        double sonBitisSaati;
+        if (muayenedekiHasta != null) {
+            sonBitisSaati = muayeneBitisSaati;
+        } else {
+            sonBitisSaati = calculateLastFinishTime();
+        }
+
+        h.setMuayeneSaati(Math.max(h.hastaKayitSaati, sonBitisSaati));
+        HastaHeap.ekle(h);
+    }
+
+    private void startNewExamination(double currentTime) {
+        if (!HastaHeap.bosMu()) {
+            Hasta yeniMuayeneHasta = HastaHeap.cikar();
+
+            // Hasta muayene zamanı geldiyse
+            if (yeniMuayeneHasta.getMuayeneSaati() <= currentTime) {
+                muayenedekiHasta = yeniMuayeneHasta;
+                muayeneBitisSaati = saatTopla(muayenedekiHasta.getMuayeneSaati(),
+                        muayenedekiHasta.getMuayeneSuresi());
+
+                System.out.println("🏥 Muayeneye alınan: " + muayenedekiHasta.hastaAdi +
+                        " (Başlangıç: " + muayenedekiHasta.getMuayeneSaati() +
+                        ", Bitiş: " + muayeneBitisSaati + ")");
+
+                // Sıradaki hastanın başlangıç saatini güncelle
+                if (!HastaHeap.bosMu()) {
+                    Hasta siradaki = HastaHeap.peek();
+                    double yeniBaslangic = muayeneBitisSaati;
+                    siradaki.setMuayeneSaati(yeniBaslangic);
+                }
+            } else {
+                // Henüz zamanı gelmedi, heap'e geri ekle
+                HastaHeap.ekle(yeniMuayeneHasta);
+            }
+        }
+    }
+
+    private double calculateLastFinishTime() {
+        double enSonBitisSaati = baslangicSaati;
+
+        if (!HastaHeap.bosMu()) {
+            for (Hasta heapHastasi : HastaHeap.getTumHastalar()) {
+                double bitisSaati = saatTopla(heapHastasi.getMuayeneSaati(), heapHastasi.getMuayeneSuresi());
+                if (bitisSaati > enSonBitisSaati) {
+                    enSonBitisSaati = bitisSaati;
+                }
+            }
+        }
+
+        return enSonBitisSaati;
+    }
+
+    private void processFinishedExaminations(double currentTime) {
+        // Muayenesi bitmiş hastaları çıkar
+        while (!HastaHeap.bosMu()) {
+            Hasta enOncelikli = HastaHeap.peek();
+            double bitisZamani = saatTopla(enOncelikli.getMuayeneSaati(), enOncelikli.getMuayeneSuresi());
+
+            // Eğer hasta henüz muayeneye başlamadıysa döngüyü kır
+            if (currentTime < enOncelikli.getMuayeneSaati()) {
+                break;
+            }
+
+            // Eğer hasta muayenesini bitirdiyse çıkar
+            if (currentTime >= bitisZamani) {
+                Hasta cikan = HastaHeap.cikar();
+                System.out.println("✅ Muayenesi biten: " + cikan.hastaAdi +
+                        " (Bitiş: " + bitisZamani + ")");
+            }
+            // Eğer hasta hala muayenedeyse
+            else if (currentTime >= enOncelikli.getMuayeneSaati() && currentTime < bitisZamani) {
+                System.out.println("⚠️ Muayenedeki hasta: " + enOncelikli.hastaAdi +
+                        " (Başlangıç: " + enOncelikli.getMuayeneSaati() +
+                        ", Bitiş: " + bitisZamani + ")");
+                break; // Muayenedeki hasta bitene kadar diğerlerine dokunma
+            }
+        }
+    }
+
+
+
     private String doubleToSaatDakika(double zaman) {
         int saat = (int) zaman;
         int dakika = (int) ((zaman - saat) * 60);
         return String.format("%02d:%02d", saat, dakika);
     }
+
     public static double saatTopla(double saatDouble, int dakikaEkle) {
         int saat = (int) saatDouble;
-        int dakika = (int) Math.round((saatDouble - saat) * 100); // 0.40 → 40 dakikaya çeviriyoruz
+        int dakika = (int) Math.round((saatDouble - saat) * 100);
 
         dakika += dakikaEkle;
 
         saat += dakika / 60;
         dakika = dakika % 60;
 
-        return saat + (dakika / 100.0); // 10 saat 0 dakika → 10.00
+        return saat + (dakika / 100.0);
     }
 
-
-
-
-
-
-    private double getCurrentDoubleTime() {
-        LocalTime time = LocalTime.now();
-        return time.getHour() + (time.getMinute() / 60.0);  // Dakikayı doğru şekilde 60'a bölüyoruz
-    }
 
 
     private void guncelleMuayeneSaati(int ekSure, double hastaKayitSaati) {
-        muayeneSaati=saatTopla(hastaKayitSaati, ekSure);
-
+        muayeneSaati = saatTopla(hastaKayitSaati, ekSure);
         System.out.println("Muayene saati: " + muayeneSaati);
     }
-
-
-
-
-
 
     public void verileriHazirla() {
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(getClass().getResource("/org/example/hastaneotomasyonu/Hasta.txt").openStream(), StandardCharsets.UTF_8))) {
 
             String line;
-            double previousMuayeneSaati = 0; // Önceki muayene saati
             while ((line = br.readLine()) != null) {
                 String[] parcalar = line.split(",");
                 if (parcalar.length >= 8) {
@@ -193,29 +319,12 @@ public class HelloController {
                     String kanama = parcalar[6].trim().toLowerCase();
                     double kayitSaati = Double.parseDouble(parcalar[7].trim().replace(",", "."));
 
-                    // Muayene saati hesaplanacak
-
-
-                    // İlk hastadan sonraki hastalar için muayene saati belirleniyor
-
-
-                    // Hasta oluşturuluyor
                     Hasta hasta = new Hasta(ad, yas, cinsiyet, mahkum, engelli, kanama, kayitSaati);
-
-                    // Muayene saati hastaya atanıyor
-
-
-                    // Listeye ekleniyor
                     bekleyenHastalar.add(hasta);
-
-                    // Sonraki hastanın muayene saati için güncelleniyor
-
                 }
             }
 
-            // Kayıt saatlerine göre sıralama (küçükten büyüğe)
             Collections.sort(bekleyenHastalar, Comparator.comparingDouble(Hasta::getHastaKayitSaati));
-
             System.out.println("Bekleyen hastalar yüklendi ve sıralandı: " + bekleyenHastalar.size());
 
         } catch (Exception e) {
@@ -223,7 +332,6 @@ public class HelloController {
             e.printStackTrace();
         }
     }
-
 
     @FXML
     private void heapGoster() throws IOException {
@@ -249,20 +357,14 @@ public class HelloController {
             boolean mahkum = checkMahkum.isSelected();
             int engelli = Integer.parseInt(txtEngelli.getText());
             String kanama = comboKanama.getValue();
-            double saat = Double.parseDouble(txtSaat.getText().replace(",", ".")); // virgül düzeltmesi
+            double saat = Double.parseDouble(txtSaat.getText().replace(",", "."));
 
-            // Yeni hasta oluşturuluyor
             Hasta yeniHasta = new Hasta(ad, yas, cinsiyet, mahkum, engelli, kanama.toLowerCase(), saat);
-            yeniHasta.setMuayeneSaati(saat); // İlk muayene saati kayıta eşit
+            yeniHasta.oncelikPuaniHesapla();
+            yeniHasta.muayeneSuresiHesapla();
 
-            // Eğer bekleyen listede hasta varsa, son muayene saatine göre ayarla
-            if (!bekleyenHastalar.isEmpty()) {
-                Hasta sonHasta = bekleyenHastalar.get(bekleyenHastalar.size() - 1);
-                double sonHastaMuayeneSaati = sonHasta.getMuayeneSaati() + (sonHasta.getMuayeneSuresi() / 60.0);
-                if (saat < sonHastaMuayeneSaati) {
-                    yeniHasta.setMuayeneSaati(sonHastaMuayeneSaati); // Çakışma varsa ileri al
-                }
-            }
+            double enSonBitisSaati = calculateLastFinishTime();
+            yeniHasta.setMuayeneSaati(Math.max(saat, enSonBitisSaati));
 
             bekleyenHastalar.add(yeniHasta);
             Collections.sort(bekleyenHastalar, Comparator.comparingDouble(Hasta::getHastaKayitSaati));
@@ -273,7 +375,7 @@ public class HelloController {
             alert.setContentText("Yeni hasta başarıyla eklendi.");
             alert.showAndWait();
 
-            // Form alanlarını temizle
+            // Formu temizle
             txtAd.clear();
             txtYas.clear();
             comboCinsiyet.getSelectionModel().clearSelection();
@@ -291,8 +393,6 @@ public class HelloController {
             e.printStackTrace();
         }
     }
-
-
 
     @FXML
     private void tumHastalariGoster() throws IOException {
