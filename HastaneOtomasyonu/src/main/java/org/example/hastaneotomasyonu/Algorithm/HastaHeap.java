@@ -1,5 +1,6 @@
 package org.example.hastaneotomasyonu.Algorithm;
 
+import org.example.hastaneotomasyonu.Controller.HelloController;
 import org.example.hastaneotomasyonu.models.Hasta;
 
 import java.util.*;
@@ -161,19 +162,35 @@ public class HastaHeap {
         allPatients.sort((h1, h2) -> Integer.compare(h2.getOncelikPuani(), h1.getOncelikPuani()));
 
         // Calculate examination times
-        int currentTime = 9 * 60; // Start at 09:00
+
+        double currentTime = HelloController.muayeneBitisSaati; // Start at 09:00
+        if(currentTime==0){
+            currentTime=9.00;
+        }
 
         for (Hasta hasta : allPatients) {
-            int registrationTime = saatDoubleToDakika(hasta.hastaKayitSaati);
+            double registrationTime = hasta.hastaKayitSaati;
+            System.out.println("currenttime  "+currentTime+"  registrationTime  "+registrationTime);
 
             // Doctor can't see patient before registration time
             if (currentTime < registrationTime) {
                 currentTime = registrationTime;
             }
 
-            hasta.setMuayeneSaati(dakikaToSaatDouble(currentTime));
-            currentTime += hasta.getMuayeneSuresi();
+            hasta.setMuayeneSaati(currentTime);
+            currentTime = saatTopla(currentTime,hasta.muayeneSuresi);
         }
+    }
+    public static double saatTopla(double saatDouble, int dakikaEkle) {
+        int saat = (int) saatDouble;
+        int dakika = (int) Math.round((saatDouble - saat) * 100);
+
+        dakika += dakikaEkle;
+
+        saat += dakika / 60;
+        dakika = dakika % 60;
+
+        return saat + (dakika / 100.0);
     }
 
     public void ekle(Hasta hasta) {

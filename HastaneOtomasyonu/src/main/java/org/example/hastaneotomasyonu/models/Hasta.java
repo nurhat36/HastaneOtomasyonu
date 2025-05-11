@@ -22,6 +22,18 @@ public class Hasta implements Comparable<Hasta> {
         this.kanamaliHastaDurumBilgisi = kanama;
         this.hastaKayitSaati = kayitSaati;
     }
+    public Hasta(Hasta other) {
+        this.hastaAdi = other.hastaAdi;
+        this.hastaYasi = other.hastaYasi;
+        this.cinsiyet = other.cinsiyet;
+        this.mahkumlukDurumBilgisi = other.mahkumlukDurumBilgisi;
+        this.engellilikOrani = other.engellilikOrani;
+        this.kanamaliHastaDurumBilgisi = other.kanamaliHastaDurumBilgisi;
+        this.hastaKayitSaati = other.hastaKayitSaati;
+        this.oncelikPuani = other.oncelikPuani;
+        this.muayeneSuresi = other.muayeneSuresi;
+        this.muayeneSaati = other.muayeneSaati;
+    }
 
     public void oncelikPuaniHesapla() {
         int yasPuani = 0;

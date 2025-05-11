@@ -48,13 +48,13 @@ public class HelloController {
     private double baslangicSaati = 9.00;
 
     private Hasta muayenedekiHasta = null;
-    private double muayeneBitisSaati = 0.0;
+    public static double muayeneBitisSaati = 0.0;
     private double simuleEdilenZaman = 8.00; // Sabah 8:00'de başlar
-    private double zamanHizi = 3.0; // 1.0 = gerçek zaman, 2.0 = 2x hızında vs.
+    private double zamanHizi = 1.0; // 1.0 = gerçek zaman, 2.0 = 2x hızında vs.
     private Timeline simulationTimeline;
 
     private double getCurrentDoubleTime() {
-        return simuleEdilenZaman;
+        return doubleToSaatDakika1(simuleEdilenZaman);
     }
 
     @FXML
@@ -76,6 +76,7 @@ public class HelloController {
             // Zamanı ilerlet (her saniyede 1 dakika ileri gidecek şekilde)
             simuleEdilenZaman += (1.0 / 60.0) * zamanHizi;
 
+
             // 24 saatlik döngü sağla
             if (simuleEdilenZaman >= 24.00) {
                 simuleEdilenZaman -= 24.00;
@@ -89,12 +90,13 @@ public class HelloController {
     }
 
     private void updateSystem() {
-        lblSonuc.setText("Simüle Edilen Zaman: " + doubleToSaatDakika(simuleEdilenZaman));
+        lblSonuc.setText("Simüle Edilen Zaman: " + doubleToSaatDakika1(simuleEdilenZaman));
+        System.out.println(doubleToSaatDakika1(simuleEdilenZaman));
 
         // Diğer sistem güncellemeleri
-        processNewPatients(simuleEdilenZaman);
-        checkCurrentExamination(simuleEdilenZaman);
-        displayCurrentExaminationStatus(simuleEdilenZaman);
+        processNewPatients(doubleToSaatDakika1(simuleEdilenZaman));
+        checkCurrentExamination(doubleToSaatDakika1(simuleEdilenZaman));
+        displayCurrentExaminationStatus(doubleToSaatDakika1(simuleEdilenZaman));
     }
 
     private void setupDynamicTimeline() {
@@ -149,6 +151,10 @@ public class HelloController {
                 double sonBitis = (muayenedekiHasta != null) ? muayeneBitisSaati :
                         calculateLastFinishTime();
                 h.setMuayeneSaati(Math.max(h.hastaKayitSaati, sonBitis));
+                System.out.println("son bitiş saati: " + sonBitis+"  hasta kayıt saati "+h.hastaKayitSaati);
+                System.out.println(h.muayeneSaati);
+
+
 
                 HastaHeap.ekle(h);
                 iterator.remove();
@@ -202,6 +208,7 @@ public class HelloController {
         } else {
             sonBitisSaati = calculateLastFinishTime();
         }
+        System.out.println("son bitiş saati: " + sonBitisSaati+"  hasta kayıt saati "+h.hastaKayitSaati);
 
         h.setMuayeneSaati(Math.max(h.hastaKayitSaati, sonBitisSaati));
         HastaHeap.ekle(h);
@@ -275,6 +282,12 @@ public class HelloController {
             }
         }
     }
+    private double doubleToSaatDakika1(double zaman) {
+        int saat = (int) zaman;
+        int dakika = (int) ((zaman - saat) * 60);
+        return saat + dakika / 100.0;
+    }
+
 
 
 
