@@ -7,81 +7,180 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" spacing="15.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/23.0.1" fx:controller="org.example.hastaneotomasyonu.Controller.HelloController" style="-fx-background-color: #f4f4f4; -fx-font-family: 'Arial';">
+<VBox alignment="CENTER" prefHeight="520.0" prefWidth="456.0" spacing="15.0" style="-fx-background-color: #f4f4f4; -fx-font-family: 'Arial';" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.hastaneotomasyonu.Controller.HelloController">
 
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
-    <!-- Hasta Adı -->
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Hasta Adı:" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
-        <TextField fx:id="txtAd" promptText="Adı girin..." style="-fx-background-color: #ecf0f1; -fx-border-color: #bdc3c7; -fx-text-fill: #2c3e50;" />
-    </HBox>
+    <TabPane prefHeight="366.0" prefWidth="351.0" tabClosingPolicy="UNAVAILABLE">
+        
+        <tabs>
+            <Tab style="-fx-font-weight: bold;" text="Hasta Sırası">
+                <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                        <children>
+                            <VBox alignment="TOP_CENTER" spacing="20" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <padding>
+                                    <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
+                                </padding>
 
-    <!-- Hasta Yaşı -->
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Hasta Yaşı:" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
-        <TextField fx:id="txtYas" promptText="Yaşını girin..." style="-fx-background-color: #ecf0f1; -fx-border-color: #bdc3c7; -fx-text-fill: #2c3e50;" />
-    </HBox>
+                                <!-- Muayenedeki Hasta Kartı -->
+                                <VBox style="-fx-background-color: #e3f2fd; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #bbdefb; -fx-padding: 10;">
+                                    <Label style="-fx-font-weight: bold; -fx-text-fill: #0d47a1; -fx-font-size: 12px;" text="MUAYENEDEKİ HASTA" />
+                                    <Separator style="-fx-background-color: #90caf9;" />
+                                    <GridPane hgap="10" style="-fx-padding: 5 0 0 0;" vgap="8">
+                                        <columnConstraints>
+                                            <ColumnConstraints hgrow="NEVER" prefWidth="120" />
+                                            <ColumnConstraints hgrow="ALWAYS" />
+                                        </columnConstraints>
 
-    <!-- Cinsiyet -->
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Cinsiyet:" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
-        <ComboBox fx:id="comboCinsiyet" style="-fx-background-color: #ecf0f1; -fx-border-color: #bdc3c7; -fx-text-fill: #2c3e50;">
-            <items>
-                <FXCollections fx:factory="observableArrayList">
-                    <String fx:value="E" />
-                    <String fx:value="K" />
-                </FXCollections>
-            </items>
-        </ComboBox>
-    </HBox>
+                                        <Label style="-fx-font-weight: bold; -fx-text-fill: #424242;" text="Hasta Adı:" />
+                                        <Label fx:id="lblMuayenedekiHasta" style="-fx-font-weight: bold; -fx-text-fill: #1565c0;" text="-" GridPane.columnIndex="1" />
 
-    <!-- Mahkum Durumu -->
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Mahkum mu?" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
-        <CheckBox fx:id="checkMahkum" text="Evet" style="-fx-text-fill: #2c3e50;" />
-    </HBox>
+                                        <Label style="-fx-text-fill: #616161;" text="Başlangıç Saati:" GridPane.rowIndex="1" />
+                                        <Label fx:id="lblBaslangic" style="-fx-font-weight: bold; -fx-text-fill: #2196f3;" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-    <!-- Engellilik Oranı -->
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Engellilik Oranı (%):" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
-        <TextField fx:id="txtEngelli" promptText="Engellilik oranını girin..." style="-fx-background-color: #ecf0f1; -fx-border-color: #bdc3c7; -fx-text-fill: #2c3e50;" />
-    </HBox>
+                                        <Label style="-fx-text-fill: #616161;" text="Bitiş Saati:" GridPane.rowIndex="2" />
+                              <Label fx:id="lblbitissaati" style="-fx-font-weight: bold; -fx-text-fill: #2196f3;" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <rowConstraints>
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                              </rowConstraints>
+                                    </GridPane>
+                                </VBox>
 
-    <!-- Kanama Durumu -->
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Kanama Durumu:" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
-        <ComboBox fx:id="comboKanama" style="-fx-background-color: #ecf0f1; -fx-border-color: #bdc3c7; -fx-text-fill: #2c3e50;">
-            <items>
-                <FXCollections fx:factory="observableArrayList">
-                    <String fx:value="kanamaYok" />
-                    <String fx:value="kanama" />
-                    <String fx:value="agirKanama" />
-                </FXCollections>
-            </items>
-        </ComboBox>
-    </HBox>
+                                <!-- Sıradaki Hasta Kartı -->
+                                <VBox style="-fx-background-color: #e8f5e9; -fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #c8e6c9; -fx-padding: 10;">
+                                    <Label style="-fx-font-weight: bold; -fx-text-fill: #1b5e20; -fx-font-size: 12px;" text="SIRADAKİ HASTA" />
+                                    <Separator style="-fx-background-color: #81c784;" />
+                                    <GridPane hgap="10" style="-fx-padding: 5 0 0 0;" vgap="8">
+                                        <columnConstraints>
+                                            <ColumnConstraints hgrow="NEVER" prefWidth="120" />
+                                            <ColumnConstraints hgrow="ALWAYS" />
+                                        </columnConstraints>
 
-    <!-- Kayıt Saati -->
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Kayıt Saati (örnek: 8.30):" style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
-        <TextField fx:id="txtSaat" promptText="Saat bilgisini girin..." style="-fx-background-color: #ecf0f1; -fx-border-color: #bdc3c7; -fx-text-fill: #2c3e50;" />
-    </HBox>
+                                        <Label style="-fx-font-weight: bold; -fx-text-fill: #424242;" text="Hasta Adı:" />
+                                        <Label fx:id="lblSiradakiHasta" style="-fx-font-weight: bold; -fx-text-fill: #2e7d32;" text="-" GridPane.columnIndex="1" />
+
+                                        <Label style="-fx-text-fill: #616161;" text="Tahmini Başlangıç:" GridPane.rowIndex="1" />
+                                        <Label fx:id="lblTahminiBaslangic" style="-fx-font-weight: bold; -fx-text-fill: #4caf50;" text="-" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                        <Label style="-fx-text-fill: #616161;" text="Tahmini Bitiş:" GridPane.rowIndex="2" />
+                              <Label fx:id="lbltahminibitis" style="-fx-font-weight: bold; -fx-text-fill: #2196f3;" text="-" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                              <rowConstraints>
+                                 <RowConstraints />
+                                 <RowConstraints />
+                                 <RowConstraints />
+                              </rowConstraints>
+                                    </GridPane>
+                                </VBox>
+                        <Label fx:id="lblSiradakiHasta1" style="-fx-font-weight: bold; -fx-text-fill: #2e7d32;" text="Muayenelerimiz 9.00'da başlamaktadır." />
+                            </VBox>
+                        </children>
+                    </AnchorPane>
+                </content>
+            </Tab>
+
+            <Tab text="Hasta ekle">
+                <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                        <children>
+                            <VBox layoutX="14.0" layoutY="14.0" spacing="10">
+                                <!-- Hasta Adı -->
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <Label style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Hasta Adı:" />
+                                    <TextField fx:id="txtAd" promptText="Adı girin..." style="-fx-background-color: #ecf0f1; -fx-border-color: #bdc3c7; -fx-text-fill: #2c3e50;" />
+                                </HBox>
+
+                                <!-- Hasta Yaşı -->
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <Label style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Hasta Yaşı:" />
+                                    <TextField fx:id="txtYas" promptText="Yaşını girin..." style="-fx-background-color: #ecf0f1; -fx-border-color: #bdc3c7; -fx-text-fill: #2c3e50;" />
+                                </HBox>
+
+                                <!-- Cinsiyet -->
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <Label style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Cinsiyet:" />
+                                    <ComboBox fx:id="comboCinsiyet" style="-fx-background-color: #ecf0f1; -fx-border-color: #bdc3c7; -fx-text-fill: #2c3e50;">
+                                        <items>
+                                            <FXCollections fx:factory="observableArrayList">
+                                                <String fx:value="E" />
+                                                <String fx:value="K" />
+                                            </FXCollections>
+                                        </items>
+                                    </ComboBox>
+                                </HBox>
+
+                                <!-- Mahkum Durumu -->
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <Label style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Mahkum mu?" />
+                                    <CheckBox fx:id="checkMahkum" style="-fx-text-fill: #2c3e50;" text="Evet" />
+                                </HBox>
+
+                                <!-- Engellilik Oranı -->
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <Label style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Engellilik Oranı (%):" />
+                                    <TextField fx:id="txtEngelli" promptText="Engellilik oranını girin..." style="-fx-background-color: #ecf0f1; -fx-border-color: #bdc3c7; -fx-text-fill: #2c3e50;" />
+                                </HBox>
+
+                                <!-- Kanama Durumu -->
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <Label style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Kanama Durumu:" />
+                                    <ComboBox fx:id="comboKanama" style="-fx-background-color: #ecf0f1; -fx-border-color: #bdc3c7; -fx-text-fill: #2c3e50;">
+                                        <items>
+                                            <FXCollections fx:factory="observableArrayList">
+                                                <String fx:value="kanamaYok" />
+                                                <String fx:value="kanama" />
+                                                <String fx:value="agirKanama" />
+                                            </FXCollections>
+                                        </items>
+                                    </ComboBox>
+                                </HBox>
+
+                                <!-- Kayıt Saati -->
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <Label style="-fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Kayıt Saati (örnek: 8.30):" />
+                                    <TextField fx:id="txtSaat" promptText="Saat bilgisini girin..." style="-fx-background-color: #ecf0f1; -fx-border-color: #bdc3c7; -fx-text-fill: #2c3e50;" />
+                                </HBox>
+                            </VBox>
+                        </children>
+                    </AnchorPane>
+                </content>
+            </Tab>
+        </tabs>
+    </TabPane>
 
     <!-- Düğmeler -->
-    <HBox spacing="15" alignment="CENTER">
-        <Button onAction="#hastaEkle" text="Hasta Ekle" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 5;" />
-        <Button onAction="#tumHastalariGoster" text="Tüm Hastaları Göster" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 5;" />
-        <Button text="Heap Görüntüle" onAction="#heapGoster" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 5;" />
+    <HBox alignment="CENTER" spacing="15">
+        <Button onAction="#hastaEkle" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 5;" text="Hasta Ekle" />
+        <Button onAction="#tumHastalariGoster" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 5;" text="Tüm Hastaları Göster" />
+        <Button onAction="#heapGoster" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold; -fx-border-radius: 5;" text="Heap Görüntüle" />
     </HBox>
+   <HBox prefHeight="32.0" prefWidth="384.0">
+      <children>
+      
+          <!-- Sonuç Etiketi -->
+          <Label fx:id="lblSonuc" prefHeight="30.0" prefWidth="235.0" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #2c3e50; -fx-background-color: #ecf0f1; -fx-padding: 5px; -fx-border-color: #bdc3c7;" text="Sonuç: " />
+         <Button mnemonicParsing="false" onAction="#x1button" prefHeight="32.0" prefWidth="36.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="1x" />
+         <Button mnemonicParsing="false" onAction="#x2button" prefHeight="32.0" prefWidth="36.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="2x" />
+         <Button mnemonicParsing="false" onAction="#x3button" prefHeight="32.0" prefWidth="36.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="3x" />
+         <Button mnemonicParsing="false" onAction="#x5button" prefHeight="32.0" prefWidth="36.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="5x" />
 
-    <!-- Sonuç Etiketi -->
-    <Label fx:id="lblSonuc" prefHeight="20.0" prefWidth="200.0" text="Sonuç: " style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #2c3e50; -fx-background-color: #ecf0f1; -fx-padding: 5px; -fx-border-color: #bdc3c7;" />
+      </children>
+   </HBox>
+   <Label fx:id="lblHizGostergesi" text="1x &gt;&gt;" />
 
 </VBox>

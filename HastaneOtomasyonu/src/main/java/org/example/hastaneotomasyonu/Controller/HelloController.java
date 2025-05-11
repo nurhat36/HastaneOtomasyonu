@@ -30,6 +30,20 @@ public class HelloController {
     @FXML
     private TextField txtYas;
     @FXML
+    private Label lblMuayenedekiHasta;
+    @FXML
+    private Label lblSiradakiHasta;
+    @FXML
+    private Label lblBaslangic;
+    @FXML
+    private Label lblTahminiBaslangic;
+    @FXML
+    private Label lblbitissaati;
+    @FXML
+    private Label lbltahminibitis;
+    @FXML
+    private Label lblHizGostergesi;
+    @FXML
     private ComboBox<String> comboCinsiyet;
     @FXML
     private CheckBox checkMahkum;
@@ -164,6 +178,9 @@ public class HelloController {
 
     private void displayCurrentExaminationStatus(double currentTime) {
         if (muayenedekiHasta != null) {
+            lblMuayenedekiHasta.setText(muayenedekiHasta.hastaAdi);
+            lblBaslangic.setText(String.valueOf(muayenedekiHasta.getMuayeneSaati()));
+            lblbitissaati.setText(String.valueOf(muayeneBitisSaati));
             System.out.println("🔵 Şu anda muayenede: " + muayenedekiHasta.hastaAdi);
             System.out.printf("   Başlangıç: %.2f, Bitiş: %.2f%n",
                     muayenedekiHasta.getMuayeneSaati(), muayeneBitisSaati);
@@ -171,11 +188,17 @@ public class HelloController {
             // Sıradaki hasta bilgisi
             if (!HastaHeap.bosMu()) {
                 Hasta siradaki = HastaHeap.peek();
+                lblSiradakiHasta.setText(siradaki.hastaAdi);
+                lblTahminiBaslangic.setText(String.valueOf(siradaki.getMuayeneSaati()));
+                lbltahminibitis.setText(String.valueOf(saatTopla(siradaki.getMuayeneSaati(),siradaki.muayeneSuresi)));
                 System.out.println("🟡 Sıradaki: " + siradaki.hastaAdi +
                         " (Başlangıç: " + siradaki.getMuayeneSaati() + ")");
             }
         } else if (!HastaHeap.bosMu()) {
             Hasta ilkHasta = HastaHeap.peek();
+            lblSiradakiHasta.setText(ilkHasta.hastaAdi);
+            lblTahminiBaslangic.setText(String.valueOf(ilkHasta.getMuayeneSaati()));
+            lbltahminibitis.setText(String.valueOf(saatTopla(ilkHasta.getMuayeneSaati(),ilkHasta.muayeneSuresi)));
             System.out.println("⏳ Bekleyen hasta: " + ilkHasta.hastaAdi +
                     " (Muayene Başlangıç: " + ilkHasta.getMuayeneSaati() + ")");
         }
@@ -411,4 +434,25 @@ public class HelloController {
     private void tumHastalariGoster() throws IOException {
         setRoot("hastagoster");
     }
+    @FXML
+    private void x1button(){
+        zamanHizi=1;
+        lblHizGostergesi.setText(zamanHizi+">>");
+    }
+    @FXML
+    private void x2button(){
+        zamanHizi=2;
+        lblHizGostergesi.setText(zamanHizi+">>");
+    }
+    @FXML
+    private void x3button(){
+        zamanHizi=3;
+        lblHizGostergesi.setText(zamanHizi+">>");
+    }
+    @FXML
+    private void x5button(){
+        zamanHizi=5;
+        lblHizGostergesi.setText(zamanHizi+">>");
+    }
+
 }
