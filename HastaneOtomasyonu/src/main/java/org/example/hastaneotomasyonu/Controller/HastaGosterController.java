@@ -9,7 +9,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import org.example.hastaneotomasyonu.Algorithm.HastaHeap;
 import org.example.hastaneotomasyonu.models.Hasta;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.List;
+import java.util.Locale;
 
 public class HastaGosterController {
     @FXML private TableView<Hasta> tableView;
@@ -22,20 +25,24 @@ public class HastaGosterController {
     public void initialize() {
         adiColumn.setCellValueFactory(new PropertyValueFactory<>("hastaAdi"));
         puanColumn.setCellValueFactory(new PropertyValueFactory<>("oncelikPuani"));
-        saatColumn.setCellValueFactory(new PropertyValueFactory<>("muayeneSaati"));
+
+        // Noktalı formatlama için
+        DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US));
+
+        saatColumn.setCellValueFactory(cellData -> {
+            double saat = cellData.getValue().getMuayeneSaati();
+            double gosterilecekSaat = saat > 24 ? saat - 24 : saat;
+            double yuvarlanmisSaat = Double.parseDouble(df.format(gosterilecekSaat));
+            return new javafx.beans.property.SimpleDoubleProperty(yuvarlanmisSaat).asObject();
+        });
+
         sureColumn.setCellValueFactory(new PropertyValueFactory<>("muayeneSuresi"));
 
-        // Örnek veriler doğru constructor ile oluşturulmalı
         HastaHeap heap = HelloController.HastaHeap;
-
-        // Heap içindeki tüm hastaları çek (liste olarak)
         List<Hasta> hastaListesi = List.of(heap.getTumHastalar());
-
-        // ObservableList'e dönüştür
         ObservableList<Hasta> veri = FXCollections.observableArrayList(hastaListesi);
-
-        // Tabloya veriyi bağla
         tableView.setItems(veri);
     }
+
 
 }

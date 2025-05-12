@@ -55,6 +55,7 @@ public class HelloController {
     private TextField txtSaat;
     @FXML
     private Label lblSonuc;
+    public static int day=0;
 
     public static HastaHeap HastaHeap;
     private List<Hasta> bekleyenHastalar = new ArrayList<>();
@@ -89,12 +90,13 @@ public class HelloController {
         simulationTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
             // Zamanı ilerlet (her saniyede 1 dakika ileri gidecek şekilde)
             simuleEdilenZaman += (1.0 / 60.0) * zamanHizi;
+            if(doubleToSaatDakika1(simuleEdilenZaman)>24){
+                day = (int) (doubleToSaatDakika1(simuleEdilenZaman)/24);
+            }
 
 
             // 24 saatlik döngü sağla
-            if (simuleEdilenZaman >= 24.00) {
-                simuleEdilenZaman -= 24.00;
-            }
+
 
             // Sistem güncellemelerini yap
             updateSystem();
@@ -104,7 +106,10 @@ public class HelloController {
     }
 
     private void updateSystem() {
-        lblSonuc.setText("Simüle Edilen Zaman: " + doubleToSaatDakika1(simuleEdilenZaman));
+
+        lblSonuc.setText("Simüle Edilen Zaman: " + (doubleToSaatDakika1(simuleEdilenZaman)-(24*day)));
+
+
         System.out.println(doubleToSaatDakika1(simuleEdilenZaman));
 
         // Diğer sistem güncellemeleri
@@ -179,7 +184,7 @@ public class HelloController {
     private void displayCurrentExaminationStatus(double currentTime) {
         if (muayenedekiHasta != null) {
             lblMuayenedekiHasta.setText(muayenedekiHasta.hastaAdi);
-            lblBaslangic.setText(String.valueOf(muayenedekiHasta.getMuayeneSaati()));
+            lblBaslangic.setText(String.valueOf((muayenedekiHasta.getMuayeneSaati()-(24*day))));
             lblbitissaati.setText(String.valueOf(muayeneBitisSaati));
             System.out.println("🔵 Şu anda muayenede: " + muayenedekiHasta.hastaAdi);
             System.out.printf("   Başlangıç: %.2f, Bitiş: %.2f%n",
@@ -189,7 +194,7 @@ public class HelloController {
             if (!HastaHeap.bosMu()) {
                 Hasta siradaki = HastaHeap.peek();
                 lblSiradakiHasta.setText(siradaki.hastaAdi);
-                lblTahminiBaslangic.setText(String.valueOf(siradaki.getMuayeneSaati()));
+                lblTahminiBaslangic.setText(String.valueOf((siradaki.getMuayeneSaati()-(24*day))));
                 lbltahminibitis.setText(String.valueOf(saatTopla(siradaki.getMuayeneSaati(),siradaki.muayeneSuresi)));
                 System.out.println("🟡 Sıradaki: " + siradaki.hastaAdi +
                         " (Başlangıç: " + siradaki.getMuayeneSaati() + ")");
@@ -197,7 +202,7 @@ public class HelloController {
         } else if (!HastaHeap.bosMu()) {
             Hasta ilkHasta = HastaHeap.peek();
             lblSiradakiHasta.setText(ilkHasta.hastaAdi);
-            lblTahminiBaslangic.setText(String.valueOf(ilkHasta.getMuayeneSaati()));
+            lblTahminiBaslangic.setText(String.valueOf((ilkHasta.getMuayeneSaati()-(24*day))));
             lbltahminibitis.setText(String.valueOf(saatTopla(ilkHasta.getMuayeneSaati(),ilkHasta.muayeneSuresi)));
             System.out.println("⏳ Bekleyen hasta: " + ilkHasta.hastaAdi +
                     " (Muayene Başlangıç: " + ilkHasta.getMuayeneSaati() + ")");
