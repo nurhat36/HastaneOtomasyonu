@@ -459,5 +459,10 @@ public class HelloController {
         zamanHizi=5;
         lblHizGostergesi.setText(zamanHizi+">>");
     }
+    @FXML
+    private void stop(){
+        zamanHizi=0;
+        lblHizGostergesi.setText(zamanHizi+">>");
+    }
 
 }
