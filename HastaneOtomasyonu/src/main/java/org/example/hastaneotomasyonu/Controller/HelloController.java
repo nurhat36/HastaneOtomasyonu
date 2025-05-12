@@ -6,6 +6,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import com.sun.speech.freetts.Voice;
+import com.sun.speech.freetts.VoiceManager;
+
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -195,6 +198,8 @@ public class HelloController {
             }
         }
     }
+    private Hasta lastAnnouncedPatient = null;
+    private String lastAnnouncedStatus = null;
 
     private void displayCurrentExaminationStatus(double currentTime) {
         DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US)); // Noktalı format
@@ -221,6 +226,12 @@ public class HelloController {
                 } else {
                     lblMuayenedekiHasta.setText(lblMuayenedekiHasta.getText() + "  🩸 Kanama");
                 }
+            }
+            if (shouldAnnouncePatient(muayenedekiHasta)) {
+                String sesliBilgi = createAnnouncementText(muayenedekiHasta);
+                speak(sesliBilgi);
+                lastAnnouncedPatient = muayenedekiHasta;
+                lastAnnouncedStatus = getPatientStatus(muayenedekiHasta);
             }
 
             System.out.println("🔵 Şu anda muayenede: " + muayenedekiHasta.hastaAdi);
@@ -255,6 +266,7 @@ public class HelloController {
 
                 lblTahminiBaslangic.setText(df.format(tahminiBaslangic));
                 lbltahminibitis.setText(df.format(tahminiBitis));
+
 
                 System.out.println("🟡 Sıradaki: " + siradaki.hastaAdi +
                         " (Başlangıç: " + siradaki.getMuayeneSaati() + ")");
@@ -335,6 +347,129 @@ public class HelloController {
 
             vboxHastaListesi.getChildren().add(kutucuk);
         }
+    }
+    private final Object voiceLock = new Object();
+
+    private boolean shouldAnnouncePatient(Hasta currentPatient) {
+        if (currentPatient == null) {
+            return false;
+        }
+
+        // Eğer önceki hasta yoksa veya farklı bir hastaysa
+        if (lastAnnouncedPatient == null || !lastAnnouncedPatient.equals(currentPatient)) {
+            return true;
+        }
+
+        // Aynı hasta ama durumu değişmişse
+        String currentStatus = getPatientStatus(currentPatient);
+        boolean statusChanged = !currentStatus.equals(lastAnnouncedStatus);
+
+        // Önemli durum değişikliklerini kontrol et (kanama gibi)
+        boolean criticalChange = false;
+        if (lastAnnouncedPatient.kanamaliHastaDurumBilgisi == null &&
+                currentPatient.kanamaliHastaDurumBilgisi != null) {
+            criticalChange = true;
+        } else if (lastAnnouncedPatient.kanamaliHastaDurumBilgisi != null &&
+                currentPatient.kanamaliHastaDurumBilgisi != null &&
+                !lastAnnouncedPatient.kanamaliHastaDurumBilgisi.equals(
+                        currentPatient.kanamaliHastaDurumBilgisi)) {
+            criticalChange = true;
+        }
+
+        return statusChanged || criticalChange;
+    }
+
+    private String getPatientStatus(Hasta hasta) {
+        // Hasta durumunu benzersiz şekilde tanımlayan string
+        return String.format("%s_%d_%s",
+                hasta.hastaAdi,
+                hasta.engellilikOrani,
+                hasta.kanamaliHastaDurumBilgisi != null ? hasta.kanamaliHastaDurumBilgisi : "kanamaYok");
+    }
+
+    private String createAnnouncementText(Hasta hasta) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Patient ").append(hasta.hastaAdi).append(" is currently in examination.");
+
+        if (hasta.engellilikOrani > 0) {
+            sb.append(" Disability rate: ").append((int)hasta.engellilikOrani).append(" percent");
+        }
+
+        if (hasta.kanamaliHastaDurumBilgisi != null) {
+            if (hasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("agirKanama")) {
+                sb.append(" Emergency! Severe bleeding detected!");
+            } else if (!hasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("kanamaYok")) {
+                sb.append(" Warning! Bleeding condition present.");
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private void speak(String text) {
+        new Thread(() -> {
+            synchronized (voiceLock) {
+                try {
+                    // Önce Türkçe sesi deneyelim
+                    System.setProperty("freetts.voices",
+                            "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
+
+                    VoiceManager voiceManager = VoiceManager.getInstance();
+
+                    // Önce Kevin sesini deneyin (daha güvenilir)
+                    Voice voice = voiceManager.getVoice("kevin16");
+
+                    if (voice == null) {
+                        voice = voiceManager.getVoice("kevin16"); // Fallback İngilizce
+                    }
+
+                    if (voice != null) {
+                        try {
+                            voice.allocate();
+
+                            // Türkçe metin için optimizasyonlar
+                            if (containsTurkishCharacters(text)) {
+                                voice.setRate(110);  // Daha yavaş konuşma
+                                voice.setPitch(105); // Biraz daha yüksek perde
+                            } else {
+                                voice.setRate(150);  // İngilizce için normal hız
+                            }
+
+                            voice.speak(text);
+
+                            // Konuşma bittikten sonra küçük bir bekleme
+                            Thread.sleep(300);
+                        } finally {
+                            voice.deallocate();
+                        }
+                    } else {
+                        System.err.println("[SES SİSTEMİ] Hiçbir ses bulunamadı!");
+                    }
+                } catch (Exception e) {
+                    System.err.println("[SES HATASI] " + e.getMessage());
+                }
+            }
+        }).start();
+    }
+
+    // Yardımcı metodlar
+    private boolean containsTurkishCharacters(String text) {
+        return text.matches(".*[çÇğĞıİöÖşŞüÜ].*");
+    }
+
+    private String normalizeTurkishText(String text) {
+        return text.replace('İ', 'I')
+                .replace('ı', 'i')
+                .replace('ğ', 'g')
+                .replace('Ğ', 'G')
+                .replace('ş', 's')
+                .replace('Ş', 'S')
+                .replace('ü', 'u')
+                .replace('Ü', 'U')
+                .replace('ö', 'o')
+                .replace('Ö', 'O')
+                .replace('ç', 'c')
+                .replace('Ç', 'C');
     }
 
 

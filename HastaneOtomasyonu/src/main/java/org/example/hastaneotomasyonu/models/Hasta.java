@@ -36,20 +36,43 @@ public class Hasta implements Comparable<Hasta> {
     }
 
     public void oncelikPuaniHesapla() {
-        int yasPuani = 0;
-        if (hastaYasi < 5) yasPuani = 20;
-        else if (hastaYasi < 45) yasPuani = 0;
-        else if (hastaYasi < 65) yasPuani = 15;
-        else yasPuani = 25;
+        // Yaş puanı hesaplama (formülle tam uyumlu)
+        int yasPuani;
+        if (hastaYasi >= 0 && hastaYasi < 5) {
+            yasPuani = 20;
+        } else if (hastaYasi >= 5 && hastaYasi < 45) {
+            yasPuani = 0;
+        } else if (hastaYasi >= 45 && hastaYasi < 65) {
+            yasPuani = 15;
+        } else if (hastaYasi >= 65) {
+            yasPuani = 25;
+        } else {
+            yasPuani = 0; // Geçersiz yaş için
+        }
 
+        // Mahkumluk durumu (formülde belirtilmemiş, önceki koddan korundu)
         int mahkumPuani = mahkumlukDurumBilgisi ? 50 : 0;
-        int engelliPuani = engellilikOrani;
-        int kanamaPuani = switch (kanamaliHastaDurumBilgisi.toLowerCase()) {
-            case "kanama" -> 20;
-            case "agirkanama" -> 50;
-            default -> 0;
-        };
 
+        // Engellilik puanı (engellilikOrani/4 şeklinde hesaplanacak)
+        int engelliPuani = engellilikOrani / 4;
+
+        // Kanama durumu puanı
+        int kanamaPuani = 0;
+        if (kanamaliHastaDurumBilgisi != null) {
+            switch (kanamaliHastaDurumBilgisi.toLowerCase()) {
+                case "kanama":
+                    kanamaPuani = 20;
+                    break;
+                case "agirkanama":
+                    kanamaPuani = 50;
+                    break;
+                case "kanamayok":
+                default:
+                    kanamaPuani = 0;
+            }
+        }
+
+        // Toplam puan hesaplama
         this.oncelikPuani = yasPuani + mahkumPuani + engelliPuani + kanamaPuani;
     }
 

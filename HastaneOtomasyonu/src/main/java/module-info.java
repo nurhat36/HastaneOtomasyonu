@@ -4,6 +4,7 @@ module org.example.hastaneotomasyonu {
 
     requires org.controlsfx.controls;
     requires org.kordamp.bootstrapfx.core;
+    requires freetts;
 
     opens org.example.hastaneotomasyonu to javafx.fxml;
     exports org.example.hastaneotomasyonu;
