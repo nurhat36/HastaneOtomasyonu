@@ -2,11 +2,16 @@ package org.example.hastaneotomasyonu.Controller;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.example.hastaneotomasyonu.Algorithm.HastaHeap;
@@ -26,11 +31,15 @@ import java.util.*;
 import static org.example.hastaneotomasyonu.HelloApplication.setRoot;
 
 public class HelloController {
+    @FXML
+    private ListView<String> listSiradakiHastalar;
 
     @FXML
     private TextField txtAd;
     @FXML
     private TextField txtYas;
+    @FXML
+    private VBox vboxHastaListesi;
     @FXML
     private Label lblMuayenedekiHasta;
     @FXML
@@ -88,6 +97,7 @@ public class HelloController {
         setupDynamicTimeline();
         startSimulationTimeline();
     }
+
     private void startSimulationTimeline() {
         simulationTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
             // Zamanı ilerlet (her saniyede 1 dakika ileri gidecek şekilde)
@@ -189,13 +199,29 @@ public class HelloController {
     private void displayCurrentExaminationStatus(double currentTime) {
         DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US)); // Noktalı format
 
+        // Muayenedeki hasta bilgileri
         if (muayenedekiHasta != null) {
-            lblMuayenedekiHasta.setText(muayenedekiHasta.hastaAdi);
+            String cinsiyetIkonu = muayenedekiHasta.cinsiyet.equalsIgnoreCase("E") ? "👨" : "👩";
+            lblMuayenedekiHasta.setText(cinsiyetIkonu + " " + muayenedekiHasta.hastaAdi);
 
             double baslangic = muayenedekiHasta.getMuayeneSaati() - (24 * day);
             lblBaslangic.setText(df.format(baslangic));
+            lblbitissaati.setText(df.format(muayeneBitisSaati - (24 * day)));
 
-            lblbitissaati.setText(df.format(muayeneBitisSaati- (24 * day)));
+            // ♿ Engellilik oranı
+            if (muayenedekiHasta.engellilikOrani > 0) {
+                lblMuayenedekiHasta.setText(lblMuayenedekiHasta.getText() + "  ♿ %" + muayenedekiHasta.engellilikOrani);
+            }
+
+            // 🩸 Kanama durumu
+            if (muayenedekiHasta.kanamaliHastaDurumBilgisi != null &&
+                    !muayenedekiHasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("kanamaYok")) {
+                if (muayenedekiHasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("agirKanama")) {
+                    lblMuayenedekiHasta.setText(lblMuayenedekiHasta.getText() + "  🆘 Ağır Kanama");
+                } else {
+                    lblMuayenedekiHasta.setText(lblMuayenedekiHasta.getText() + "  🩸 Kanama");
+                }
+            }
 
             System.out.println("🔵 Şu anda muayenede: " + muayenedekiHasta.hastaAdi);
             System.out.printf("   Başlangıç: %.2f, Bitiş: %.2f%n",
@@ -204,10 +230,28 @@ public class HelloController {
             // Sıradaki hasta bilgisi
             if (!HastaHeap.bosMu()) {
                 Hasta siradaki = HastaHeap.peek();
-                lblSiradakiHasta.setText(siradaki.hastaAdi);
+                String cinsiyetIkonuSiradaki = siradaki.cinsiyet.equalsIgnoreCase("E") ? "👨" : "👩";
+                String siradakiHastaText = cinsiyetIkonuSiradaki + " " + siradaki.hastaAdi;
+
+                // ♿ engellilik oranı
+                if (siradaki.engellilikOrani > 0) {
+                    siradakiHastaText += "  ♿ %" + siradaki.engellilikOrani;
+                }
+
+                // 🩸 Kanama durumu
+                if (siradaki.kanamaliHastaDurumBilgisi != null &&
+                        !siradaki.kanamaliHastaDurumBilgisi.equalsIgnoreCase("kanamaYok")) {
+                    if (siradaki.kanamaliHastaDurumBilgisi.equalsIgnoreCase("agirKanama")) {
+                        siradakiHastaText += "  🆘 Ağır Kanama";
+                    } else {
+                        siradakiHastaText += "  🩸 Kanama";
+                    }
+                }
+
+                lblSiradakiHasta.setText(siradakiHastaText);
 
                 double tahminiBaslangic = siradaki.getMuayeneSaati() - (24 * day);
-                double tahminiBitis = saatTopla(siradaki.getMuayeneSaati(), siradaki.muayeneSuresi)- (24 * day);
+                double tahminiBitis = saatTopla(siradaki.getMuayeneSaati(), siradaki.muayeneSuresi) - (24 * day);
 
                 lblTahminiBaslangic.setText(df.format(tahminiBaslangic));
                 lbltahminibitis.setText(df.format(tahminiBitis));
@@ -217,10 +261,28 @@ public class HelloController {
             }
         } else if (!HastaHeap.bosMu()) {
             Hasta ilkHasta = HastaHeap.peek();
-            lblSiradakiHasta.setText(ilkHasta.hastaAdi);
+            String cinsiyetIkonu = ilkHasta.cinsiyet.equalsIgnoreCase("E") ? "👨" : "👩";
+            String ilkHastaText = cinsiyetIkonu + " " + ilkHasta.hastaAdi;
+
+            // ♿ engellilik oranı
+            if (ilkHasta.engellilikOrani > 0) {
+                ilkHastaText += "  ♿ %" + ilkHasta.engellilikOrani;
+            }
+
+            // 🩸 kanama
+            if (ilkHasta.kanamaliHastaDurumBilgisi != null &&
+                    !ilkHasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("kanamaYok")) {
+                if (ilkHasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("agirKanama")) {
+                    ilkHastaText += "  🆘 Ağır Kanama";
+                } else {
+                    ilkHastaText += "  🩸 Kanama";
+                }
+            }
+
+            lblSiradakiHasta.setText(ilkHastaText);
 
             double tahminiBaslangic = ilkHasta.getMuayeneSaati() - (24 * day);
-            double tahminiBitis = saatTopla(ilkHasta.getMuayeneSaati(), ilkHasta.muayeneSuresi)- (24 * day);
+            double tahminiBitis = saatTopla(ilkHasta.getMuayeneSaati(), ilkHasta.muayeneSuresi) - (24 * day);
 
             lblTahminiBaslangic.setText(df.format(tahminiBaslangic));
             lbltahminibitis.setText(df.format(tahminiBitis));
@@ -228,7 +290,54 @@ public class HelloController {
             System.out.println("⏳ Bekleyen hasta: " + ilkHasta.hastaAdi +
                     " (Muayene Başlangıç: " + ilkHasta.getMuayeneSaati() + ")");
         }
+
+        // 🔽 Tüm sıradaki hastaları listele
+        vboxHastaListesi.getChildren().removeIf(node -> node instanceof HBox); // Önceki kutuları temizle
+
+        for (Hasta h : HastaHeap.getTumHastalar()) {
+            String baslangic = df.format(h.getMuayeneSaati() - (24 * day));
+            String bitis = df.format(saatTopla(h.getMuayeneSaati(), h.muayeneSuresi));
+
+            HBox kutucuk = new HBox(10);
+            kutucuk.setStyle("-fx-background-color: #ffe0b2; -fx-background-radius: 6; -fx-padding: 8;");
+            kutucuk.setAlignment(Pos.CENTER_LEFT);
+
+            String cinsiyetIkonu = h.cinsiyet.equalsIgnoreCase("E") ? "👨" : "👩";
+
+            Label lblAd = new Label(cinsiyetIkonu + " " + h.hastaAdi);
+            lblAd.setStyle("-fx-font-weight: bold; -fx-text-fill: #e65100;");
+
+            Label lblSaat = new Label("🕒 " + baslangic + " - " + bitis);
+            lblSaat.setStyle("-fx-text-fill: #6d4c41;");
+
+            kutucuk.getChildren().addAll(lblAd, lblSaat);
+
+            if (h.engellilikOrani > 0) {
+                Label lblEngelli = new Label("♿ %" + h.engellilikOrani);
+                lblEngelli.setStyle("-fx-text-fill: #4e342e;");
+                kutucuk.getChildren().add(lblEngelli);
+            }
+
+            if (h.kanamaliHastaDurumBilgisi != null &&
+                    !h.kanamaliHastaDurumBilgisi.equalsIgnoreCase("kanamaYok")) {
+                Label lblKanama;
+
+                if (h.kanamaliHastaDurumBilgisi.equalsIgnoreCase("agirKanama")) {
+                    lblKanama = new Label("🆘 Ağır Kanama");
+                    lblKanama.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
+                } else {
+                    lblKanama = new Label("🩸 Kanama");
+                    lblKanama.setStyle("-fx-text-fill: red; -fx-font-weight: bold; -fx-font-size: 14;");
+
+                }
+                kutucuk.getChildren().add(lblKanama);
+            }
+
+            vboxHastaListesi.getChildren().add(kutucuk);
+        }
     }
+
+
 
 
     private void processPastPatients(double currentTime) {

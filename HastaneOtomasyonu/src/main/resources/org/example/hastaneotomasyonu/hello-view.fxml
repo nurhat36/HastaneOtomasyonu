@@ -7,6 +7,8 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -25,12 +27,14 @@
     </padding>
 
     <TabPane prefHeight="366.0" prefWidth="351.0" tabClosingPolicy="UNAVAILABLE">
-        
+
         <tabs>
             <Tab style="-fx-font-weight: bold;" text="Hasta Sırası">
                 <content>
                     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                         <children>
+                            <ScrollPane fitToHeight="true" fitToWidth="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+
                             <VBox alignment="TOP_CENTER" spacing="20" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <padding>
                                     <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
@@ -87,8 +91,20 @@
                               </rowConstraints>
                                     </GridPane>
                                 </VBox>
-                        <Label fx:id="lblSiradakiHasta1" style="-fx-font-weight: bold; -fx-text-fill: #2e7d32;" text="Muayenelerimiz 9.00'da başlamaktadır." />
+                                <!-- Diğer Sıradaki Hastalar -->
+                                <VBox fx:id="vboxHastaListesi" spacing="10"
+                                      style="-fx-background-color: #fff3e0; -fx-background-radius: 8; -fx-border-radius: 8;
+             -fx-border-color: #ffe0b2; -fx-padding: 10;"
+                                      prefWidth="366.0" VBox.vgrow="ALWAYS">
+                                    <Label style="-fx-font-weight: bold; -fx-text-fill: #ef6c00; -fx-font-size: 12px;"
+                                           text="TÜM SIRADAKİ HASTALAR" />
+                                    <Separator style="-fx-background-color: #ffb74d;" />
+                                </VBox>
+
+
+                                <Label fx:id="lblSiradakiHasta1" style="-fx-font-weight: bold; -fx-text-fill: #2e7d32;" text="Muayenelerimiz 9.00'da başlamaktadır." />
                             </VBox>
+                            </ScrollPane>
                         </children>
                     </AnchorPane>
                 </content>
