@@ -18,6 +18,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -107,7 +109,10 @@ public class HelloController {
 
     private void updateSystem() {
 
-        lblSonuc.setText("Simüle Edilen Zaman: " + (doubleToSaatDakika1(simuleEdilenZaman)-(24*day)));
+        DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US));
+        double sonuc = doubleToSaatDakika1(simuleEdilenZaman) - (24 * day);
+        lblSonuc.setText("Simüle Edilen Zaman: " + df.format(sonuc));
+
 
 
         System.out.println(doubleToSaatDakika1(simuleEdilenZaman));
@@ -182,10 +187,16 @@ public class HelloController {
     }
 
     private void displayCurrentExaminationStatus(double currentTime) {
+        DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US)); // Noktalı format
+
         if (muayenedekiHasta != null) {
             lblMuayenedekiHasta.setText(muayenedekiHasta.hastaAdi);
-            lblBaslangic.setText(String.valueOf((muayenedekiHasta.getMuayeneSaati()-(24*day))));
-            lblbitissaati.setText(String.valueOf(muayeneBitisSaati));
+
+            double baslangic = muayenedekiHasta.getMuayeneSaati() - (24 * day);
+            lblBaslangic.setText(df.format(baslangic));
+
+            lblbitissaati.setText(df.format(muayeneBitisSaati- (24 * day)));
+
             System.out.println("🔵 Şu anda muayenede: " + muayenedekiHasta.hastaAdi);
             System.out.printf("   Başlangıç: %.2f, Bitiş: %.2f%n",
                     muayenedekiHasta.getMuayeneSaati(), muayeneBitisSaati);
@@ -194,20 +205,31 @@ public class HelloController {
             if (!HastaHeap.bosMu()) {
                 Hasta siradaki = HastaHeap.peek();
                 lblSiradakiHasta.setText(siradaki.hastaAdi);
-                lblTahminiBaslangic.setText(String.valueOf((siradaki.getMuayeneSaati()-(24*day))));
-                lbltahminibitis.setText(String.valueOf(saatTopla(siradaki.getMuayeneSaati(),siradaki.muayeneSuresi)));
+
+                double tahminiBaslangic = siradaki.getMuayeneSaati() - (24 * day);
+                double tahminiBitis = saatTopla(siradaki.getMuayeneSaati(), siradaki.muayeneSuresi)- (24 * day);
+
+                lblTahminiBaslangic.setText(df.format(tahminiBaslangic));
+                lbltahminibitis.setText(df.format(tahminiBitis));
+
                 System.out.println("🟡 Sıradaki: " + siradaki.hastaAdi +
                         " (Başlangıç: " + siradaki.getMuayeneSaati() + ")");
             }
         } else if (!HastaHeap.bosMu()) {
             Hasta ilkHasta = HastaHeap.peek();
             lblSiradakiHasta.setText(ilkHasta.hastaAdi);
-            lblTahminiBaslangic.setText(String.valueOf((ilkHasta.getMuayeneSaati()-(24*day))));
-            lbltahminibitis.setText(String.valueOf(saatTopla(ilkHasta.getMuayeneSaati(),ilkHasta.muayeneSuresi)));
+
+            double tahminiBaslangic = ilkHasta.getMuayeneSaati() - (24 * day);
+            double tahminiBitis = saatTopla(ilkHasta.getMuayeneSaati(), ilkHasta.muayeneSuresi)- (24 * day);
+
+            lblTahminiBaslangic.setText(df.format(tahminiBaslangic));
+            lbltahminibitis.setText(df.format(tahminiBitis));
+
             System.out.println("⏳ Bekleyen hasta: " + ilkHasta.hastaAdi +
                     " (Muayene Başlangıç: " + ilkHasta.getMuayeneSaati() + ")");
         }
     }
+
 
     private void processPastPatients(double currentTime) {
         Iterator<Hasta> iterator = bekleyenHastalar.iterator();
