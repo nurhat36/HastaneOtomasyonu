@@ -1,5 +1,8 @@
 package org.example.hastaneotomasyonu.Controller;
 
+import com.sun.jna.platform.win32.*;
+import com.sun.jna.platform.win32.COM.*;
+import com.sun.jna.platform.win32.COM.util.Factory;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
@@ -81,6 +84,7 @@ public class HelloController {
     private double simuleEdilenZaman = 8.00; // Sabah 8:00'de başlar
     private double zamanHizi = 1.0; // 1.0 = gerçek zaman, 2.0 = 2x hızında vs.
     private Timeline simulationTimeline;
+    private Factory COMUtils;
 
     private double getCurrentDoubleTime() {
         return doubleToSaatDakika1(simuleEdilenZaman);
@@ -350,37 +354,68 @@ public class HelloController {
     }
     private final Object voiceLock = new Object();
 
-    private boolean shouldAnnouncePatient(Hasta currentPatient) {
-        if (currentPatient == null) {
-            return false;
-        }
+    private void speak(String text) {
+        new Thread(() -> {
+            synchronized (voiceLock) {
+                if (containsTurkishCharacters(text)) {
+                    speakWithFreeTTS(text);
+                } else {
+                    speakWithFreeTTS(text);
+                }
+            }
+        }).start();
+    }
 
-        // Eğer önceki hasta yoksa veya farklı bir hastaysa
+
+
+    private void speakWithFreeTTS(String text) {
+        try {
+            System.setProperty("freetts.voices", "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
+            VoiceManager voiceManager = VoiceManager.getInstance();
+            Voice voice = voiceManager.getVoice("kevin16");
+
+            if (voice != null) {
+                voice.allocate();
+                voice.setRate(150);
+                voice.speak(text);
+                voice.deallocate();
+            }
+        } catch (Exception e) {
+            System.err.println("[FreeTTS HATASI] " + e.getMessage());
+        }
+    }
+
+    private boolean containsTurkishCharacters(String text) {
+        return text.matches(".*[çÇğĞıİöÖşŞüÜ].*");
+    }
+
+    private boolean shouldAnnouncePatient(Hasta currentPatient) {
+        if (currentPatient == null) return false;
+
         if (lastAnnouncedPatient == null || !lastAnnouncedPatient.equals(currentPatient)) {
             return true;
         }
 
-        // Aynı hasta ama durumu değişmişse
         String currentStatus = getPatientStatus(currentPatient);
         boolean statusChanged = !currentStatus.equals(lastAnnouncedStatus);
 
-        // Önemli durum değişikliklerini kontrol et (kanama gibi)
-        boolean criticalChange = false;
-        if (lastAnnouncedPatient.kanamaliHastaDurumBilgisi == null &&
-                currentPatient.kanamaliHastaDurumBilgisi != null) {
-            criticalChange = true;
-        } else if (lastAnnouncedPatient.kanamaliHastaDurumBilgisi != null &&
-                currentPatient.kanamaliHastaDurumBilgisi != null &&
-                !lastAnnouncedPatient.kanamaliHastaDurumBilgisi.equals(
-                        currentPatient.kanamaliHastaDurumBilgisi)) {
-            criticalChange = true;
-        }
+        boolean criticalChange = checkCriticalChange(currentPatient);
 
         return statusChanged || criticalChange;
     }
 
+    private boolean checkCriticalChange(Hasta currentPatient) {
+        if (lastAnnouncedPatient.kanamaliHastaDurumBilgisi == null &&
+                currentPatient.kanamaliHastaDurumBilgisi != null) {
+            return true;
+        }
+        return lastAnnouncedPatient.kanamaliHastaDurumBilgisi != null &&
+                currentPatient.kanamaliHastaDurumBilgisi != null &&
+                !lastAnnouncedPatient.kanamaliHastaDurumBilgisi.equals(
+                        currentPatient.kanamaliHastaDurumBilgisi);
+    }
+
     private String getPatientStatus(Hasta hasta) {
-        // Hasta durumunu benzersiz şekilde tanımlayan string
         return String.format("%s_%d_%s",
                 hasta.hastaAdi,
                 hasta.engellilikOrani,
@@ -389,87 +424,21 @@ public class HelloController {
 
     private String createAnnouncementText(Hasta hasta) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Patient ").append(hasta.hastaAdi).append(" is currently in examination.");
+        sb.append("Hasta ").append(hasta.hastaAdi).append(" şu anda muayenede.");
 
         if (hasta.engellilikOrani > 0) {
-            sb.append(" Disability rate: ").append((int)hasta.engellilikOrani).append(" percent");
+            sb.append(" Engellilik oranı: ").append((int) hasta.engellilikOrani).append(" yüzde.");
         }
 
         if (hasta.kanamaliHastaDurumBilgisi != null) {
             if (hasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("agirKanama")) {
-                sb.append(" Emergency! Severe bleeding detected!");
+                sb.append(" Acil! Ağır kanama tespit edildi!");
             } else if (!hasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("kanamaYok")) {
-                sb.append(" Warning! Bleeding condition present.");
+                sb.append(" Uyarı! Kanama durumu mevcut.");
             }
         }
 
         return sb.toString();
-    }
-
-    private void speak(String text) {
-        new Thread(() -> {
-            synchronized (voiceLock) {
-                try {
-                    // Önce Türkçe sesi deneyelim
-                    System.setProperty("freetts.voices",
-                            "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
-
-                    VoiceManager voiceManager = VoiceManager.getInstance();
-
-                    // Önce Kevin sesini deneyin (daha güvenilir)
-                    Voice voice = voiceManager.getVoice("kevin16");
-
-                    if (voice == null) {
-                        voice = voiceManager.getVoice("kevin16"); // Fallback İngilizce
-                    }
-
-                    if (voice != null) {
-                        try {
-                            voice.allocate();
-
-                            // Türkçe metin için optimizasyonlar
-                            if (containsTurkishCharacters(text)) {
-                                voice.setRate(110);  // Daha yavaş konuşma
-                                voice.setPitch(105); // Biraz daha yüksek perde
-                            } else {
-                                voice.setRate(150);  // İngilizce için normal hız
-                            }
-
-                            voice.speak(text);
-
-                            // Konuşma bittikten sonra küçük bir bekleme
-                            Thread.sleep(300);
-                        } finally {
-                            voice.deallocate();
-                        }
-                    } else {
-                        System.err.println("[SES SİSTEMİ] Hiçbir ses bulunamadı!");
-                    }
-                } catch (Exception e) {
-                    System.err.println("[SES HATASI] " + e.getMessage());
-                }
-            }
-        }).start();
-    }
-
-    // Yardımcı metodlar
-    private boolean containsTurkishCharacters(String text) {
-        return text.matches(".*[çÇğĞıİöÖşŞüÜ].*");
-    }
-
-    private String normalizeTurkishText(String text) {
-        return text.replace('İ', 'I')
-                .replace('ı', 'i')
-                .replace('ğ', 'g')
-                .replace('Ğ', 'G')
-                .replace('ş', 's')
-                .replace('Ş', 'S')
-                .replace('ü', 'u')
-                .replace('Ü', 'U')
-                .replace('ö', 'o')
-                .replace('Ö', 'O')
-                .replace('ç', 'c')
-                .replace('Ç', 'C');
     }
 
 
