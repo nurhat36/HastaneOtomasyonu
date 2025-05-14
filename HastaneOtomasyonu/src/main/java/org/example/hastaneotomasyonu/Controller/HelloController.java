@@ -1,19 +1,13 @@
 package org.example.hastaneotomasyonu.Controller;
 
-import com.sun.jna.platform.win32.*;
-import com.sun.jna.platform.win32.COM.*;
 import com.sun.jna.platform.win32.COM.util.Factory;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import com.sun.speech.freetts.Voice;
-import com.sun.speech.freetts.VoiceManager;
 
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -26,6 +20,7 @@ import javafx.util.Duration;
 import org.example.hastaneotomasyonu.Algorithm.HastaHeap;
 import org.example.hastaneotomasyonu.Services.ClockService;
 import org.example.hastaneotomasyonu.Services.GlobalHeapService;
+import org.example.hastaneotomasyonu.Services.VoiceAnnouncementService;
 import org.example.hastaneotomasyonu.models.Hasta;
 
 import java.io.BufferedReader;
@@ -34,7 +29,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.time.LocalTime;
 import java.util.*;
 
 import static org.example.hastaneotomasyonu.HelloApplication.setRoot;
@@ -230,8 +224,7 @@ public class HelloController {
             }
         }
     }
-    private Hasta lastAnnouncedPatient = null;
-    private String lastAnnouncedStatus = null;
+    private final VoiceAnnouncementService announcementService = new VoiceAnnouncementService();
 
     private void displayCurrentExaminationStatus(double currentTime) {
         DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US)); // Noktalı format
@@ -259,12 +252,7 @@ public class HelloController {
                     lblMuayenedekiHasta.setText(lblMuayenedekiHasta.getText() + "  🩸 Kanama");
                 }
             }
-            if (shouldAnnouncePatient(muayenedekiHasta)) {
-                String sesliBilgi = createAnnouncementText(muayenedekiHasta);
-                speak(sesliBilgi);
-                lastAnnouncedPatient = muayenedekiHasta;
-                lastAnnouncedStatus = getPatientStatus(muayenedekiHasta);
-            }
+            announcementService.announcePatient(muayenedekiHasta);
 
             System.out.println("🔵 Şu anda muayenede: " + muayenedekiHasta.hastaAdi);
             System.out.printf("   Başlangıç: %.2f, Bitiş: %.2f%n",
@@ -380,95 +368,6 @@ public class HelloController {
             vboxHastaListesi.getChildren().add(kutucuk);
         }
     }
-    private final Object voiceLock = new Object();
-
-    private void speak(String text) {
-        new Thread(() -> {
-            synchronized (voiceLock) {
-                if (containsTurkishCharacters(text)) {
-                    speakWithFreeTTS(text);
-                } else {
-                    speakWithFreeTTS(text);
-                }
-            }
-        }).start();
-    }
-
-
-
-    private void speakWithFreeTTS(String text) {
-        try {
-            System.setProperty("freetts.voices", "com.sun.speech.freetts.en.us.cmu_us_kal.KevinVoiceDirectory");
-            VoiceManager voiceManager = VoiceManager.getInstance();
-            Voice voice = voiceManager.getVoice("kevin16");
-
-            if (voice != null) {
-                voice.allocate();
-                voice.setRate(150);
-                voice.speak(text);
-                voice.deallocate();
-            }
-        } catch (Exception e) {
-            System.err.println("[FreeTTS HATASI] " + e.getMessage());
-        }
-    }
-
-    private boolean containsTurkishCharacters(String text) {
-        return text.matches(".*[çÇğĞıİöÖşŞüÜ].*");
-    }
-
-    private boolean shouldAnnouncePatient(Hasta currentPatient) {
-        if (currentPatient == null) return false;
-
-        if (lastAnnouncedPatient == null || !lastAnnouncedPatient.equals(currentPatient)) {
-            return true;
-        }
-
-        String currentStatus = getPatientStatus(currentPatient);
-        boolean statusChanged = !currentStatus.equals(lastAnnouncedStatus);
-
-        boolean criticalChange = checkCriticalChange(currentPatient);
-
-        return statusChanged || criticalChange;
-    }
-
-    private boolean checkCriticalChange(Hasta currentPatient) {
-        if (lastAnnouncedPatient.kanamaliHastaDurumBilgisi == null &&
-                currentPatient.kanamaliHastaDurumBilgisi != null) {
-            return true;
-        }
-        return lastAnnouncedPatient.kanamaliHastaDurumBilgisi != null &&
-                currentPatient.kanamaliHastaDurumBilgisi != null &&
-                !lastAnnouncedPatient.kanamaliHastaDurumBilgisi.equals(
-                        currentPatient.kanamaliHastaDurumBilgisi);
-    }
-
-    private String getPatientStatus(Hasta hasta) {
-        return String.format("%s_%d_%s",
-                hasta.hastaAdi,
-                hasta.engellilikOrani,
-                hasta.kanamaliHastaDurumBilgisi != null ? hasta.kanamaliHastaDurumBilgisi : "kanamaYok");
-    }
-
-    private String createAnnouncementText(Hasta hasta) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Patient ").append(hasta.hastaAdi).append(" is currently being examined.");
-
-        if (hasta.engellilikOrani > 0) {
-            sb.append(" Disability rate: ").append((int) hasta.engellilikOrani).append(" percent.");
-        }
-
-        if (hasta.kanamaliHastaDurumBilgisi != null) {
-            if (hasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("agirKanama")) {
-                sb.append(" Emergency! Severe bleeding detected!");
-            } else if (!hasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("kanamaYok")) {
-                sb.append(" Warning! Bleeding condition present.");
-            }
-        }
-
-        return sb.toString();
-    }
-
 
 
 
@@ -640,7 +539,7 @@ public class HelloController {
 
     @FXML
     private void heapGoster() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/hastaneotomasyonu/heap-view.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/hastaneotomasyonu/view/heap-view.fxml"));
         Parent root = loader.load();
 
         HeapViewController controller = loader.getController();

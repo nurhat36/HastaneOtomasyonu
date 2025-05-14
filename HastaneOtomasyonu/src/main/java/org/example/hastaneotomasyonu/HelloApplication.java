@@ -56,7 +56,7 @@ public class HelloApplication extends Application {
 
 
     private static Parent loadFXML(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("/org/example/hastaneotomasyonu/"+fxml + ".fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("/org/example/hastaneotomasyonu/view/"+fxml + ".fxml"));
         return fxmlLoader.load();
     }
 
