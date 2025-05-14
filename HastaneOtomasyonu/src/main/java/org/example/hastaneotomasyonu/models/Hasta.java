@@ -78,8 +78,8 @@ public class Hasta implements Comparable<Hasta> {
 
     public void muayeneSuresiHesapla() {
         int sure = 10;
-        if (hastaYasi >= 65) sure += 15;
-        int engelliSure = engellilikOrani >= 80 ? 20 : engellilikOrani >= 50 ? 10 : 0;
+        if (hastaYasi < 65) sure += 15;
+        int engelliSure = engellilikOrani /5;
         int kanamaSure = switch (kanamaliHastaDurumBilgisi.toLowerCase()) {
             case "kanama" -> 10;
             case "agirkanama" -> 20;

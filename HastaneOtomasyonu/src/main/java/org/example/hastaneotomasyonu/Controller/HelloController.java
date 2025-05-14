@@ -3,8 +3,11 @@ package org.example.hastaneotomasyonu.Controller;
 import com.sun.jna.platform.win32.*;
 import com.sun.jna.platform.win32.COM.*;
 import com.sun.jna.platform.win32.COM.util.Factory;
+import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -81,13 +84,13 @@ public class HelloController {
 
     private Hasta muayenedekiHasta = null;
     public static double muayeneBitisSaati = 0.0;
-    private double simuleEdilenZaman = 8.00; // Sabah 8:00'de başlar
-    private double zamanHizi = 1.0; // 1.0 = gerçek zaman, 2.0 = 2x hızında vs.
+    private DoubleProperty simuleEdilenZaman = new SimpleDoubleProperty(8); // toplam dakika
+    private DoubleProperty zamanHizi = new SimpleDoubleProperty(0.02); // 1x, 2x, 5x hız gibi
     private Timeline simulationTimeline;
     private Factory COMUtils;
 
     private double getCurrentDoubleTime() {
-        return doubleToSaatDakika1(simuleEdilenZaman);
+        return doubleToSaatDakika1(simuleEdilenZaman.get());
     }
 
     @FXML
@@ -102,42 +105,67 @@ public class HelloController {
         processPastPatients(currentTime);
 
         setupDynamicTimeline();
-        startSimulationTimeline();
+        startSimulationTimer();
     }
 
-    private void startSimulationTimeline() {
-        simulationTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
-            // Zamanı ilerlet (her saniyede 1 dakika ileri gidecek şekilde)
-            simuleEdilenZaman += (1.0 / 60.0) * zamanHizi;
-            if(doubleToSaatDakika1(simuleEdilenZaman)>24){
-                day = (int) (doubleToSaatDakika1(simuleEdilenZaman)/24);
+    private AnimationTimer simulationTimer;
+    private long lastUpdateTime = 0;
+
+    // Zaman kontrol değişkenleri
+
+
+
+    private void startSimulationTimer() {
+        if (simulationTimer != null) {
+            simulationTimer.stop();
+        }
+
+        simulationTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                if (lastUpdateTime == 0) {
+                    lastUpdateTime = now;
+                    return;
+                }
+
+                long elapsedNanos = now - lastUpdateTime;
+                double elapsedSeconds = elapsedNanos / 1_000_000_000.0;
+
+                // Zamanı hızlandırılmış şekilde arttır
+                double dakikaArtisi = elapsedSeconds * zamanHizi.get();
+                simuleEdilenZaman.set(simuleEdilenZaman.get() + dakikaArtisi);
+
+                // Gün hesaplama (her 1440 dakika = 24 saat)
+                if (simuleEdilenZaman.get() >= (day + 1) * 1440) {
+                    day = (int) (simuleEdilenZaman.get() / 1440);
+                }
+
+                updateSystem(); // sistem güncellemelerini çağır
+
+                lastUpdateTime = now;
             }
+        };
 
-
-            // 24 saatlik döngü sağla
-
-
-            // Sistem güncellemelerini yap
-            updateSystem();
-        }));
-        simulationTimeline.setCycleCount(Timeline.INDEFINITE);
-        simulationTimeline.play();
+        simulationTimer.start();
     }
+
+
+
 
     private void updateSystem() {
 
         DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US));
-        double sonuc = doubleToSaatDakika1(simuleEdilenZaman) - (24 * day);
+        double sonuc = doubleToSaatDakika1(simuleEdilenZaman.get()) - (24 * day);
         lblSonuc.setText("Simüle Edilen Zaman: " + df.format(sonuc));
 
 
 
-        System.out.println(doubleToSaatDakika1(simuleEdilenZaman));
+        System.out.println(doubleToSaatDakika1(simuleEdilenZaman.get()));
 
         // Diğer sistem güncellemeleri
-        processNewPatients(doubleToSaatDakika1(simuleEdilenZaman));
-        checkCurrentExamination(doubleToSaatDakika1(simuleEdilenZaman));
-        displayCurrentExaminationStatus(doubleToSaatDakika1(simuleEdilenZaman));
+        processNewPatients(doubleToSaatDakika1(simuleEdilenZaman.get()));
+        checkCurrentExamination(doubleToSaatDakika1(simuleEdilenZaman.get()));
+        displayCurrentExaminationStatus(doubleToSaatDakika1(simuleEdilenZaman.get()));
     }
 
     private void setupDynamicTimeline() {
@@ -424,22 +452,23 @@ public class HelloController {
 
     private String createAnnouncementText(Hasta hasta) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Hasta ").append(hasta.hastaAdi).append(" şu anda muayenede.");
+        sb.append("Patient ").append(hasta.hastaAdi).append(" is currently being examined.");
 
         if (hasta.engellilikOrani > 0) {
-            sb.append(" Engellilik oranı: ").append((int) hasta.engellilikOrani).append(" yüzde.");
+            sb.append(" Disability rate: ").append((int) hasta.engellilikOrani).append(" percent.");
         }
 
         if (hasta.kanamaliHastaDurumBilgisi != null) {
             if (hasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("agirKanama")) {
-                sb.append(" Acil! Ağır kanama tespit edildi!");
+                sb.append(" Emergency! Severe bleeding detected!");
             } else if (!hasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("kanamaYok")) {
-                sb.append(" Uyarı! Kanama durumu mevcut.");
+                sb.append(" Warning! Bleeding condition present.");
             }
         }
 
         return sb.toString();
     }
+
 
 
 
@@ -621,6 +650,7 @@ public class HelloController {
         stage.setTitle("Hasta Heap Görselleştirici");
         stage.setScene(new Scene(root));
         stage.centerOnScreen();
+        stage.setOnCloseRequest(e -> controller.durdurGuncelleme()); // 👈 Sayfa kapanınca durdur
         stage.show();
     }
 
@@ -676,28 +706,19 @@ public class HelloController {
     }
     @FXML
     private void x1button(){
-        zamanHizi=1;
-        lblHizGostergesi.setText(zamanHizi+">>");
+        zamanHizi.set(zamanHizi.get()/2);
+        lblHizGostergesi.setText(zamanHizi.get()*100+"x >>");
     }
     @FXML
     private void x2button(){
-        zamanHizi=2;
-        lblHizGostergesi.setText(zamanHizi+">>");
+        zamanHizi.set(zamanHizi.get()*2);
+        lblHizGostergesi.setText(zamanHizi.get()*100+"x >>");
     }
-    @FXML
-    private void x3button(){
-        zamanHizi=3;
-        lblHizGostergesi.setText(zamanHizi+">>");
-    }
-    @FXML
-    private void x5button(){
-        zamanHizi=5;
-        lblHizGostergesi.setText(zamanHizi+">>");
-    }
+
     @FXML
     private void stop(){
-        zamanHizi=0;
-        lblHizGostergesi.setText(zamanHizi+">>");
+        zamanHizi.set(0);
+        lblHizGostergesi.setText(zamanHizi.get()*100+"x >>");
     }
 
 }

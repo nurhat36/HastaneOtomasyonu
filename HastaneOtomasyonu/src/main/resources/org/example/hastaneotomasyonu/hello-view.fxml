@@ -7,7 +7,6 @@
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Tab?>
@@ -92,12 +91,8 @@
                                     </GridPane>
                                 </VBox>
                                 <!-- Diğer Sıradaki Hastalar -->
-                                <VBox fx:id="vboxHastaListesi" spacing="10"
-                                      style="-fx-background-color: #fff3e0; -fx-background-radius: 8; -fx-border-radius: 8;
-             -fx-border-color: #ffe0b2; -fx-padding: 10;"
-                                      prefWidth="366.0" VBox.vgrow="ALWAYS">
-                                    <Label style="-fx-font-weight: bold; -fx-text-fill: #ef6c00; -fx-font-size: 12px;"
-                                           text="TÜM SIRADAKİ HASTALAR" />
+                                <VBox fx:id="vboxHastaListesi" prefWidth="366.0" spacing="10" style="-fx-background-color: #fff3e0; -fx-background-radius: 8; -fx-border-radius: 8;              -fx-border-color: #ffe0b2; -fx-padding: 10;" VBox.vgrow="ALWAYS">
+                                    <Label style="-fx-font-weight: bold; -fx-text-fill: #ef6c00; -fx-font-size: 12px;" text="TÜM SIRADAKİ HASTALAR" />
                                     <Separator style="-fx-background-color: #ffb74d;" />
                                 </VBox>
 
@@ -190,10 +185,8 @@
       
           <!-- Sonuç Etiketi -->
           <Label fx:id="lblSonuc" prefHeight="30.0" prefWidth="235.0" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #2c3e50; -fx-background-color: #ecf0f1; -fx-padding: 5px; -fx-border-color: #bdc3c7;" text="Sonuç: " />
-         <Button mnemonicParsing="false" onAction="#x1button" prefHeight="32.0" prefWidth="36.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="1x" />
-         <Button mnemonicParsing="false" onAction="#x2button" prefHeight="32.0" prefWidth="36.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="2x" />
-         <Button mnemonicParsing="false" onAction="#x3button" prefHeight="32.0" prefWidth="36.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="3x" />
-         <Button mnemonicParsing="false" onAction="#x5button" prefHeight="32.0" prefWidth="36.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="5x" />
+         <Button mnemonicParsing="false" onAction="#x1button" prefHeight="31.0" prefWidth="62.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="Yavaşlat" />
+         <Button mnemonicParsing="false" onAction="#x2button" prefHeight="31.0" prefWidth="70.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="Hızlandır" />
          <Button mnemonicParsing="false" onAction="#stop" prefHeight="31.0" prefWidth="45.0" style="-fx-background-color: #ff0000; -fx-text-fill: white;" text="Stop" />
 
       </children>

@@ -1,11 +1,14 @@
 package org.example.hastaneotomasyonu.Controller;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.Duration;
 import org.example.hastaneotomasyonu.Algorithm.HastaHeap;
 import org.example.hastaneotomasyonu.models.Hasta;
 
@@ -20,6 +23,22 @@ public class HastaGosterController {
     @FXML private TableColumn<Hasta, Integer> puanColumn;
     @FXML private TableColumn<Hasta, Double> saatColumn;
     @FXML private TableColumn<Hasta, Integer> sureColumn;
+    private Timeline tabloGuncellemeZamanlayici;
+
+    private void baslatTabloGuncelleme() {
+        tabloGuncellemeZamanlayici = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+            guncelleTablo();
+        }));
+        tabloGuncellemeZamanlayici.setCycleCount(Timeline.INDEFINITE);
+        tabloGuncellemeZamanlayici.play();
+    }
+
+    private void guncelleTablo() {
+        HastaHeap heap = HelloController.HastaHeap;
+        List<Hasta> hastaListesi = List.of(heap.getTumHastalar());
+        ObservableList<Hasta> veri = FXCollections.observableArrayList(hastaListesi);
+        tableView.setItems(veri);
+    }
 
     @FXML
     public void initialize() {
@@ -42,7 +61,15 @@ public class HastaGosterController {
         List<Hasta> hastaListesi = List.of(heap.getTumHastalar());
         ObservableList<Hasta> veri = FXCollections.observableArrayList(hastaListesi);
         tableView.setItems(veri);
+        baslatTabloGuncelleme();
+
     }
+    public void durdurGuncelleme() {
+        if (tabloGuncellemeZamanlayici != null) {
+            tabloGuncellemeZamanlayici.stop();
+        }
+    }
+
 
 
 }

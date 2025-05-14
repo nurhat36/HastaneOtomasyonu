@@ -1,10 +1,13 @@
 package org.example.hastaneotomasyonu.Controller;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.util.Duration;
 import org.example.hastaneotomasyonu.Algorithm.HastaHeap;
 import org.example.hastaneotomasyonu.models.Hasta;
 
@@ -18,11 +21,26 @@ public class HeapViewController {
     private static final double VERTICAL_SPACING = 100;  // Increased vertical spacing
     private static final double INITIAL_HORIZONTAL_OFFSET = 40;  // Increased initial spacing
     private static final double WIDTH_SCALE_FACTOR = 2.2;  // Controls how much nodes spread horizontally
+    private Timeline heapGuncellemeZamanlayici;
+
+    public void baslatHeapGuncelleme() {
+        if (heapGuncellemeZamanlayici != null) {
+            heapGuncellemeZamanlayici.stop();
+        }
+
+        heapGuncellemeZamanlayici = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+            refresh(); // her saniye tekrar çiz
+        }));
+        heapGuncellemeZamanlayici.setCycleCount(Timeline.INDEFINITE);
+        heapGuncellemeZamanlayici.play();
+    }
 
     public void setHeap(HastaHeap heap) {
         this.heap = heap;
-        drawHeap();
+        drawHeap();              // ilk yüklemede bir kez çiz
+        baslatHeapGuncelleme();  // sonra periyodik olarak yenile
     }
+
 
     private void drawHeap() {
         if (heap == null || heap.boyut() == 0) {
@@ -131,4 +149,11 @@ public class HeapViewController {
     public void refresh() {
         drawHeap();
     }
+
+    public void durdurGuncelleme() {
+        if (heapGuncellemeZamanlayici != null) {
+            heapGuncellemeZamanlayici.stop();
+        }
+    }
+
 }
