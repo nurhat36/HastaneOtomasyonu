@@ -8,9 +8,9 @@
 *,Fatih   ,28,E,true ,000,kanamaYok ,16.18,*,*,*
 *,Ece     ,42,K,false,000,agirKanama,16.10,*,*,*
 *,Mahir   ,90,E,false,050,kanama    ,09.55,*,*,*
-*,Asl�    ,26,K,true ,010,kanama    ,09.56,*,*,*
+*,Asli    ,26,K,true ,010,kanama    ,09.56,*,*,*
 *,Zeynep  ,38,K,false,000,kanamaYok ,10.30,*,*,*
-*,Tu�e    ,55,K,false,030,kanama    ,10.42,*,*,*
+*,Tuğçe    ,55,K,false,030,kanama    ,10.42,*,*,*
 *,Neslihan,66,K,true ,000,agirKanama,10.48,*,*,*
 *,Ahmi    ,72,E,false,040,kanamaYok ,11.06,*,*,*
 *,Ramazan ,77,E,false,080,kanamaYok ,11.12,*,*,*
@@ -24,9 +24,9 @@
 *,Meryem  ,33,K,false,000,agirKanama,09.01,*,*,*
 *,Hamza   ,83,E,false,000,kanamaYok ,11.18,*,*,*
 *,Bulem   ,13,K,false,000,agirKanama,12.10,*,*,*
-*,�zkan   ,29,E,false,000,kanamaYok ,13.30,*,*,*
+*,özkan   ,29,E,false,000,kanamaYok ,13.30,*,*,*
 *,Alper   ,52,E,true ,060,kanamaYok ,14.05,*,*,*
-*,A�elya  ,38,K,false,020,kanama    ,15.12,*,*,*
+*,Açelya  ,38,K,false,020,kanama    ,15.12,*,*,*
 *,Aykut   ,23,E,false,040,kanamaYok ,15.32,*,*,*
 *,Ahsen   ,53,K,true ,000,agirKanama,14.01,*,*,*
 *,Bera    ,32,E,false,000,kanama    ,14.32,*,*,*
@@ -35,6 +35,6 @@
 *,Hulusi  ,30,E,true ,050,kanamaYok ,15.55,*,*,*
 *,Berva   ,27,K,false,010,kanama    ,10.56,*,*,*
 *,Berk    ,29,E,false,100,agirKanama,11.03,*,*,*
-*,D�rdane ,37,K,true ,000,agirKanama,11.48,*,*,*
+*,Dürdane ,37,K,true ,000,agirKanama,11.48,*,*,*
 *,Erman   ,01,E,false,040,kanamaYok ,12.06,*,*,*
-*,H�srev  ,31,E,true ,000,kanamaYok ,16.30,*,*,*
+*,Hüsrev  ,31,E,true ,000,kanamaYok ,16.30,*,*,*
