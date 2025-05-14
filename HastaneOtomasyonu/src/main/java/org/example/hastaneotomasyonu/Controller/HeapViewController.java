@@ -46,7 +46,7 @@ public class HeapViewController {
         infoPanel.setManaged(false);
 
         infoWebView = new WebView();
-        infoWebView.setPrefSize(300, 250);
+        infoWebView.setPrefSize(330, 350);
         infoWebView.setContextMenuEnabled(false);
 
         infoPanel.getChildren().add(infoWebView);
