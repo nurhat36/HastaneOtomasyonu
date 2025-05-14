@@ -1,0 +1,17 @@
+/* Standart Buton */
+.button {
+    -fx-background-color: #3498db;  /* Butonun normal arka plan rengi */
+    -fx-text-fill: white;  /* Yazı rengi */
+    -fx-font-size: 14px;  /* Yazı boyutu */
+    -fx-padding: 10px 20px;  /* İç boşluk */
+    -fx-border-radius: 5px;  /* Yuvarlatılmış kenarlar */
+    -fx-transition: all 0.3s ease;  /* Animasyon efekti */
+}
+
+/* Hover durumu */
+.button:hover {
+    -fx-background-color: #2980b9;  /* Hover durumunda butonun arka plan rengi değişir */
+    -fx-scale-x: 1.1;  /* X ekseninde büyüme */
+    -fx-scale-y: 1.1;  /* Y ekseninde büyüme */
+    -fx-cursor: hand;  /* Fare simgesi el şeklinde değişir */
+}

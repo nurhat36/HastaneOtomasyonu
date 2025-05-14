@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.String?>
+<?import java.net.URL?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -19,22 +20,24 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" prefHeight="520.0" prefWidth="473.0" spacing="15.0" style="-fx-background-color: #f4f4f4; -fx-font-family: 'Arial';" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.hastaneotomasyonu.Controller.HelloController">
-
+<VBox alignment="CENTER" prefHeight="646.0" prefWidth="563.0" spacing="15.0" style="-fx-background-color: #f4f4f4; -fx-font-family: 'Arial';" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.hastaneotomasyonu.Controller.HelloController">
+    <stylesheets>
+        <URL value="@style.css" />
+    </stylesheets>
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
-    <TabPane prefHeight="366.0" prefWidth="351.0" tabClosingPolicy="UNAVAILABLE">
+    <TabPane prefHeight="474.0" prefWidth="542.0" style="-fx-background-color: #ecf0f1; -fx-border-color: #bdc3c7; -fx-border-radius: 8; -fx-background-radius: 8;" tabClosingPolicy="UNAVAILABLE">
 
         <tabs>
-            <Tab style="-fx-font-weight: bold;" text="Hasta Sırası">
+            <Tab style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #2c3e50; -fx-background-color: #3498db; -fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 7px 14px;" text="Hastalar">
                 <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-padding: 10;">
                         <children>
-                            <ScrollPane fitToHeight="true" fitToWidth="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <ScrollPane fitToHeight="true" fitToWidth="true" layoutX="5.6000000000000005" layoutY="8.8" prefHeight="332.0" prefWidth="446.0" AnchorPane.bottomAnchor="-7.0" AnchorPane.leftAnchor="-5.0" AnchorPane.rightAnchor="-9.0" AnchorPane.topAnchor="-2.0">
 
-                            <VBox alignment="TOP_CENTER" spacing="20" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <VBox alignment="TOP_CENTER" prefHeight="389.0" prefWidth="410.0" spacing="20" style="-fx-background-color: white; -fx-background-radius: 10; -fx-border-radius: 10; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <padding>
                                     <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                                 </padding>
@@ -105,9 +108,9 @@
                 </content>
             </Tab>
 
-            <Tab text="Hasta ekle">
+            <Tab style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #2c3e50; -fx-background-color: #3498db; -fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 7px 14px;" text="➕ Hasta Ekle">
                 <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" style="-fx-padding: 15px;">
                         <children>
                             <VBox layoutX="14.0" layoutY="14.0" spacing="10">
                                 <!-- Hasta Adı -->
@@ -184,13 +187,20 @@
       <children>
       
           <!-- Sonuç Etiketi -->
-          <Label fx:id="lblSonuc" prefHeight="30.0" prefWidth="235.0" style="-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #2c3e50; -fx-background-color: #ecf0f1; -fx-padding: 5px; -fx-border-color: #bdc3c7;" text="Sonuç: " />
-         <Button mnemonicParsing="false" onAction="#x1button" prefHeight="31.0" prefWidth="62.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="Yavaşlat" />
-         <Button mnemonicParsing="false" onAction="#x2button" prefHeight="31.0" prefWidth="70.0" style="-fx-background-color: #3498db; -fx-text-fill: white;" text="Hızlandır" />
-         <Button mnemonicParsing="false" onAction="#stop" prefHeight="31.0" prefWidth="45.0" style="-fx-background-color: #ff0000; -fx-text-fill: white;" text="Stop" />
+          <HBox alignment="CENTER_LEFT" prefHeight="63.0" prefWidth="459.0" spacing="10" style="-fx-padding: 10px;">
+              <Label fx:id="lblSonuc" prefHeight="35.0" prefWidth="250.0" style="                -fx-font-weight: bold;                -fx-font-size: 14px;                -fx-text-fill: #2c3e50;                -fx-background-color: #ecf0f1;                -fx-padding: 8px 12px;                -fx-border-color: #bdc3c7;                -fx-border-radius: 5px;                -fx-background-radius: 5px;            " text="Sonuç: " />
+
+              <Button onAction="#x1button" prefHeight="28.0" prefWidth="38.0" style="-fx-background-color: #3498db; -fx-font-size: 18px; -fx-text-fill: white; -fx-background-radius: 6;" styleClass="button" text="⏪" />
+
+              <Button onAction="#x2button" prefHeight="40.0" prefWidth="50.0" style="-fx-background-color: #3498db; -fx-font-size: 18px; -fx-text-fill: white; -fx-background-radius: 6;" text="⏩" />
+
+              <Button onAction="#stop" prefHeight="57.0" prefWidth="74.0" style="-fx-background-color: #e74c3c; -fx-font-size: 18px; -fx-text-fill: white; -fx-background-radius: 6;" text="⏹" />
+
+          </HBox>
+
 
       </children>
    </HBox>
-   <Label fx:id="lblHizGostergesi" text="1x &gt;&gt;" />
+   <Label fx:id="lblHizGostergesi" text="1x ⏩ " />
 
 </VBox>

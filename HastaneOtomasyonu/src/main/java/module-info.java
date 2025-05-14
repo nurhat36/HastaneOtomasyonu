@@ -1,11 +1,11 @@
 module org.example.hastaneotomasyonu {
-    requires javafx.controls;
     requires javafx.fxml;
 
     requires org.controlsfx.controls;
     requires org.kordamp.bootstrapfx.core;
     requires freetts;
     requires com.sun.jna.platform;
+    requires javafx.web;
 
     opens org.example.hastaneotomasyonu to javafx.fxml;
     exports org.example.hastaneotomasyonu;

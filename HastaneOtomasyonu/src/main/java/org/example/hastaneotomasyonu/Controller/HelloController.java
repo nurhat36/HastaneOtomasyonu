@@ -136,8 +136,8 @@ public class HelloController {
                 simuleEdilenZaman.set(simuleEdilenZaman.get() + dakikaArtisi);
 
                 // Gün hesaplama (her 1440 dakika = 24 saat)
-                if (simuleEdilenZaman.get() >= (day + 1) * 1440) {
-                    day = (int) (simuleEdilenZaman.get() / 1440);
+                if (simuleEdilenZaman.get() >= (day + 1) * 24) {
+                    day = (int) (simuleEdilenZaman.get() / 24);
                 }
 
                 updateSystem(); // sistem güncellemelerini çağır
@@ -707,18 +707,23 @@ public class HelloController {
     @FXML
     private void x1button(){
         zamanHizi.set(zamanHizi.get()/2);
-        lblHizGostergesi.setText(zamanHizi.get()*100+"x >>");
+        lblHizGostergesi.setText(zamanHizi.get()*50+"x ⏩");
     }
     @FXML
     private void x2button(){
         zamanHizi.set(zamanHizi.get()*2);
-        lblHizGostergesi.setText(zamanHizi.get()*100+"x >>");
+        lblHizGostergesi.setText(zamanHizi.get()*50+"x ⏩");
     }
 
     @FXML
     private void stop(){
-        zamanHizi.set(0);
-        lblHizGostergesi.setText(zamanHizi.get()*100+"x >>");
+        if(zamanHizi.get()==0){
+            zamanHizi.set(0.02);
+        }else{
+            zamanHizi.set(0);
+        }
+
+        lblHizGostergesi.setText(zamanHizi.get()*100+"x ⏩");
     }
 
 }

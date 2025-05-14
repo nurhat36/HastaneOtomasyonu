@@ -24,6 +24,7 @@ public class HelloApplication extends Application {
         startClockUpdater();
         scene = new Scene(loadFXML("hello-view"));
         stage.setScene(scene);
+        stage.setTitle("BİNGÜL DEVLET HASTANESİ MUAYENE SIRA SİSTEMİ");
         stage.sizeToScene();
         stage.show();
     }

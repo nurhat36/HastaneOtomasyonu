@@ -3,10 +3,16 @@ package org.example.hastaneotomasyonu.Controller;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.web.WebView;
 import javafx.util.Duration;
 import org.example.hastaneotomasyonu.Algorithm.HastaHeap;
 import org.example.hastaneotomasyonu.models.Hasta;
@@ -15,6 +21,10 @@ public class HeapViewController {
 
     @FXML
     private Canvas canvas;
+    private Pane infoPanel;
+    private Label infoLabel;
+    private boolean panelVisible = false;
+    private WebView infoWebView;
 
     private HastaHeap heap;
     private static final double NODE_RADIUS = 35;  // Increased node size
@@ -22,6 +32,252 @@ public class HeapViewController {
     private static final double INITIAL_HORIZONTAL_OFFSET = 40;  // Increased initial spacing
     private static final double WIDTH_SCALE_FACTOR = 2.2;  // Controls how much nodes spread horizontally
     private Timeline heapGuncellemeZamanlayici;
+    @FXML
+    public void initialize() {
+        // Create the info panel with WebView for rich text
+        infoPanel = new Pane();
+        infoPanel.setStyle("-fx-background-color: #ffffff; " +
+                "-fx-border-color: #3498db; " +
+                "-fx-border-width: 2; " +
+                "-fx-border-radius: 8; " +
+                "-fx-background-radius: 8; " +
+                "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 12, 0, 0, 3);");
+        infoPanel.setVisible(false);
+        infoPanel.setManaged(false);
+
+        infoWebView = new WebView();
+        infoWebView.setPrefSize(300, 250);
+        infoWebView.setContextMenuEnabled(false);
+
+        infoPanel.getChildren().add(infoWebView);
+
+        if (canvas.getParent() instanceof Pane) {
+            ((Pane)canvas.getParent()).getChildren().add(infoPanel);
+        }
+
+        canvas.setOnMouseMoved(this::handleMouseMove);
+        canvas.setOnMouseExited(e -> hideInfoPanel());
+    }
+    private void handleMouseMove(MouseEvent event) {
+        if (heap == null || heap.boyut() == 0) {
+            hideInfoPanel();
+            return;
+        }
+
+        HastaHeap.Node node = findNodeAtPosition(heap.getRoot(),
+                canvas.getWidth() / 2, 60,
+                INITIAL_HORIZONTAL_OFFSET * Math.pow(1.5, calculateDepth(heap.getRoot())-1),
+                event.getX(), event.getY());
+
+        if (node != null) {
+            showInfoPanel(node.getData(), event.getX(), event.getY());
+        } else {
+            hideInfoPanel();
+        }
+    }
+
+    private HastaHeap.Node findNodeAtPosition(HastaHeap.Node node, double nodeX, double nodeY,
+                                              double horizontalOffset, double mouseX, double mouseY) {
+        if (node == null) return null;
+
+        // Check if mouse is inside this node
+        if (mouseX >= nodeX - NODE_RADIUS && mouseX <= nodeX + NODE_RADIUS &&
+                mouseY >= nodeY - NODE_RADIUS/2 && mouseY <= nodeY + NODE_RADIUS/2) {
+            return node;
+        }
+
+        // Calculate dynamic offset for children
+        double childOffset = horizontalOffset / WIDTH_SCALE_FACTOR;
+        double childY = nodeY + VERTICAL_SPACING;
+
+        // Check left child
+        if (node.getLeft() != null) {
+            double childX = nodeX - horizontalOffset;
+            HastaHeap.Node found = findNodeAtPosition(node.getLeft(), childX, childY, childOffset, mouseX, mouseY);
+            if (found != null) return found;
+        }
+
+        // Check right child
+        if (node.getRight() != null) {
+            double childX = nodeX + horizontalOffset;
+            HastaHeap.Node found = findNodeAtPosition(node.getRight(), childX, childY, childOffset, mouseX, mouseY);
+            if (found != null) return found;
+        }
+
+        return null;
+    }
+
+    private void showInfoPanel(Hasta hasta, double x, double y) {
+        // HTML template with icons (using Font Awesome icons via CDN)
+        String htmlTemplate = """
+        <html>
+        <head>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+            <style>
+                body {
+                    font-family: 'Segoe UI', Arial, sans-serif;
+                    background-color: #f8f9fa;
+                    padding: 12px;
+                    color: #333;
+                    font-size: 13px;
+                }
+                .info-item {
+                    margin-bottom: 8px;
+                    display: flex;
+                    align-items: center;
+                }
+                .icon {
+                    width: 20px;
+                    text-align: center;
+                    margin-right: 10px;
+                    color: #3498db;
+                }
+                .header {
+                    font-weight: bold;
+                    color: #2c3e50;
+                    margin-bottom: 12px;
+                    font-size: 16px;
+                    border-bottom: 1px solid #eee;
+                    padding-bottom: 6px;
+                }
+                .priority {
+                    display: inline-block;
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    background-color: %priorityColor%;
+                    color: white;
+                    font-weight: bold;
+                    font-size: 12px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <i class="fas fa-user-circle"></i> Hasta Bilgileri
+            </div>
+            
+            <div class="info-item">
+                <div class="icon"><i class="fas fa-id-card"></i></div>
+                <div><b>Adı:</b> %name%</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="icon"><i class="fas fa-birthday-cake"></i></div>
+                <div><b>Yaş:</b> %age%</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="icon"><i class="fas fa-venus-mars"></i></div>
+                <div><b>Cinsiyet:</b> %gender%</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="icon"><i class="fas fa-handcuffs"></i></div>
+                <div><b>Mahkum:</b> %prisoner%</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="icon"><i class="fas fa-wheelchair"></i></div>
+                <div><b>Engellilik:</b> %% %disability%</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="icon"><i class="fas fa-tint"></i></div>
+                <div><b>Kanama Durumu:</b> %bleeding%</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="icon"><i class="fas fa-clock"></i></div>
+                <div><b>Kayıt Saati:</b> %registerTime%</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="icon"><i class="fas fa-stethoscope"></i></div>
+                <div><b>Muayene Saati:</b> %examTime%</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="icon"><i class="fas fa-stopwatch"></i></div>
+                <div><b>Muayene Süresi:</b> %duration% dk</div>
+            </div>
+            
+            <div class="info-item">
+                <div class="icon"><i class="fas fa-exclamation-triangle"></i></div>
+                <div><b>Öncelik Puanı:</b> <span class="priority">%priority%</span></div>
+            </div>
+        </body>
+        </html>
+        """;
+
+        // Get color based on priority
+        String priorityColor = getPriorityColorHex(hasta.oncelikPuani);
+
+        // Replace placeholders with actual data
+        String htmlContent = htmlTemplate
+                .replace("%name%", escapeHtml(hasta.hastaAdi))
+                .replace("%age%", String.valueOf(hasta.hastaYasi))
+                .replace("%gender%", escapeHtml(hasta.cinsiyet))
+                .replace("%prisoner%", hasta.mahkumlukDurumBilgisi ? "Evet" : "Hayır")
+                .replace("%disability%", String.valueOf(hasta.engellilikOrani))
+                .replace("%bleeding%", escapeHtml(hasta.kanamaliHastaDurumBilgisi))
+                .replace("%registerTime%", String.format("%.2f", hasta.hastaKayitSaati))
+                .replace("%examTime%", String.format("%.2f", hasta.muayeneSaati))
+                .replace("%duration%", String.valueOf(hasta.muayeneSuresi))
+                .replace("%priority%", String.valueOf(hasta.oncelikPuani))
+                .replace("%priorityColor%", priorityColor);
+
+        infoWebView.getEngine().loadContent(htmlContent);
+        infoPanel.setVisible(true);
+        infoPanel.setManaged(true);
+
+        // Position the panel
+        double panelWidth = 320;
+        double panelHeight = 280;
+        double panelX = x + 25;
+        double panelY = y - panelHeight/2;
+
+        // Adjust position if it would go off-screen
+        if (panelX + panelWidth > canvas.getWidth()) {
+            panelX = x - panelWidth - 25;
+        }
+        if (panelY + panelHeight > canvas.getHeight()) {
+            panelY = canvas.getHeight() - panelHeight - 15;
+        }
+        if (panelY < 15) {
+            panelY = 15;
+        }
+
+        infoPanel.setLayoutX(panelX);
+        infoPanel.setLayoutY(panelY);
+        infoPanel.setPrefSize(panelWidth, panelHeight);
+        panelVisible = true;
+
+        refresh();
+    }
+
+    private String escapeHtml(String input) {
+        if (input == null) return "";
+        return input.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+    }
+
+    private String getPriorityColorHex(int priority) {
+        // Convert your existing color to hex
+        Color color = getPriorityColor(priority);
+        return String.format("#%02X%02X%02X",
+                (int)(color.getRed() * 255),
+                (int)(color.getGreen() * 255),
+                (int)(color.getBlue() * 255));
+    }
+
+    private void hideInfoPanel() {
+        infoPanel.setVisible(false);
+        infoPanel.setManaged(false);
+        panelVisible = false;
+    }
 
     public void baslatHeapGuncelleme() {
         if (heapGuncellemeZamanlayici != null) {
@@ -89,8 +345,8 @@ public class HeapViewController {
 
         String[] lines = {
                 hasta.hastaAdi,
-                "Puan: " + hasta.getOncelikPuani(),
-                String.format("Saat: %04.2f", hasta.muayeneSaati)
+                "Puan: " + hasta.getOncelikPuani()
+
         };
 
         // Center text vertically in the node
@@ -154,6 +410,7 @@ public class HeapViewController {
         if (heapGuncellemeZamanlayici != null) {
             heapGuncellemeZamanlayici.stop();
         }
+        hideInfoPanel();
     }
 
 }
