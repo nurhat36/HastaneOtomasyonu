@@ -1,5 +1,4 @@
 package org.example.hastaneotomasyonu.Controller;
-
 import com.sun.jna.platform.win32.COM.util.Factory;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
@@ -8,7 +7,6 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -22,7 +20,6 @@ import org.example.hastaneotomasyonu.Services.ClockService;
 import org.example.hastaneotomasyonu.Services.GlobalHeapService;
 import org.example.hastaneotomasyonu.Services.VoiceAnnouncementService;
 import org.example.hastaneotomasyonu.models.Hasta;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,7 +27,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.*;
-
 import static org.example.hastaneotomasyonu.HelloApplication.setRoot;
 
 public class HelloController {

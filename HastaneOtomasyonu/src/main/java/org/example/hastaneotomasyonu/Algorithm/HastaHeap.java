@@ -7,11 +7,13 @@ import java.util.*;
 
 public class HastaHeap {
     private Node root;
+    private Node lastNode;
     private int size;
 
     public class Node {
         Hasta data;
         Node left, right, parent;
+        Node next; // For linked list structure
 
         Node(Hasta data) {
             this.data = data;
@@ -25,6 +27,7 @@ public class HastaHeap {
 
     public HastaHeap() {
         root = null;
+        lastNode = null;
         size = 0;
     }
 
@@ -36,20 +39,21 @@ public class HastaHeap {
     private Node findParentForNewNode() {
         if (root == null) return null;
 
-        int temp = size + 1;
-        String path = Integer.toBinaryString(temp).substring(1);
+        // Find parent using level order traversal
+        Queue<Node> queue = new LinkedList<>();
+        queue.add(root);
 
-        Node current = root;
-        for (char c : path.toCharArray()) {
-            if (c == '0') {
-                if (current.left == null) break;
-                current = current.left;
-            } else {
-                if (current.right == null) break;
-                current = current.right;
+        while (!queue.isEmpty()) {
+            Node current = queue.poll();
+
+            if (current.left == null || current.right == null) {
+                return current;
             }
+
+            queue.add(current.left);
+            queue.add(current.right);
         }
-        return current;
+        return null;
     }
 
     private void yukariTasima(Node node) {
@@ -66,16 +70,15 @@ public class HastaHeap {
 
         if (size == 1) {
             root = null;
+            lastNode = null;
             size--;
             return maxValue;
         }
 
-        Node lastNode = getLastNode();
-
-        // Kök ile son düğümün verisini değiştir
+        // Move last node's data to root
         root.data = lastNode.data;
 
-        // Son düğümü kaldır
+        // Remove the last node
         if (lastNode.parent != null) {
             if (lastNode.parent.left == lastNode) {
                 lastNode.parent.left = null;
@@ -84,11 +87,33 @@ public class HastaHeap {
             }
         }
 
+        // Update lastNode
+        updateLastNode();
+
         size--;
         asagiTasima(root);
 
-
+        guncelleMuayeneSaatleri();
         return maxValue;
+    }
+
+    private void updateLastNode() {
+        if (size <= 1) {
+            lastNode = root;
+            return;
+        }
+
+        Queue<Node> queue = new LinkedList<>();
+        queue.add(root);
+        Node current = null;
+
+        while (!queue.isEmpty()) {
+            current = queue.poll();
+            if (current.left != null) queue.add(current.left);
+            if (current.right != null) queue.add(current.right);
+        }
+
+        lastNode = current;
     }
 
     private void asagiTasima(Node node) {
@@ -127,60 +152,43 @@ public class HastaHeap {
         b.data = temp;
     }
 
-    private Node getLastNode() {
-        if (root == null) return null;
-
-        Queue<Node> queue = new LinkedList<>();
-        queue.add(root);
-        Node last = null;
-
-        while (!queue.isEmpty()) {
-            last = queue.poll();
-            if (last.left != null) queue.add(last.left);
-            if (last.right != null) queue.add(last.right);
-        }
-
-        return last;
-    }
-
     private void guncelleMuayeneSaatleri() {
         if (root == null) return;
 
-        // Get all patients in the heap (not in order)
-        List<Hasta> allPatients = new ArrayList<>();
+        // Get all patients in heap order using level-order traversal
+        List<Hasta> heapOrder = new ArrayList<>();
         Queue<Node> queue = new LinkedList<>();
         if (root != null) queue.add(root);
 
         while (!queue.isEmpty()) {
             Node current = queue.poll();
-            allPatients.add(current.data);
+            heapOrder.add(current.data);
             if (current.left != null) queue.add(current.left);
             if (current.right != null) queue.add(current.right);
         }
 
-        // Sort by priority (highest first)
-        allPatients.sort((h1, h2) -> Integer.compare(h2.getOncelikPuani(), h1.getOncelikPuani()));
+        // Sort by priority (highest first) for scheduling
+        List<Hasta> sortedPatients = new ArrayList<>(heapOrder);
+        sortedPatients.sort((h1, h2) -> Integer.compare(h2.getOncelikPuani(), h1.getOncelikPuani()));
 
         // Calculate examination times
-
-        double currentTime = HelloController.muayeneBitisSaati; // Start at 09:00
-        if(currentTime==0){
-            currentTime=9.00;
+        double currentTime = HelloController.muayeneBitisSaati;
+        if (currentTime == 0) {
+            currentTime = 9.00;
         }
 
-        for (Hasta hasta : allPatients) {
+        for (Hasta hasta : sortedPatients) {
             double registrationTime = hasta.hastaKayitSaati;
-            System.out.println("currenttime  "+currentTime+"  registrationTime  "+registrationTime);
 
-            // Doctor can't see patient before registration time
             if (currentTime < registrationTime) {
                 currentTime = registrationTime;
             }
 
             hasta.setMuayeneSaati(currentTime);
-            currentTime = saatTopla(currentTime,hasta.muayeneSuresi);
+            currentTime = saatTopla(currentTime, hasta.muayeneSuresi);
         }
     }
+
     public static double saatTopla(double saatDouble, int dakikaEkle) {
         int saat = (int) saatDouble;
         int dakika = (int) Math.round((saatDouble - saat) * 100);
@@ -199,6 +207,7 @@ public class HastaHeap {
 
         if (root == null) {
             root = newNode;
+            lastNode = newNode;
         } else {
             Node parent = findParentForNewNode();
             if (parent.left == null) {
@@ -207,23 +216,12 @@ public class HastaHeap {
                 parent.right = newNode;
             }
             newNode.parent = parent;
+            lastNode = newNode;
 
             yukariTasima(newNode);
         }
 
         guncelleMuayeneSaatleri();
-    }
-
-    private double dakikaToSaatDouble(int dakika) {
-        int saat = dakika / 60;
-        int kalanDakika = dakika % 60;
-        return saat + (kalanDakika / 100.0);
-    }
-
-    private int saatDoubleToDakika(double saatDouble) {
-        int saat = (int) saatDouble;
-        int dakika = (int) Math.round((saatDouble - saat) * 100);
-        return saat * 60 + dakika;
     }
 
     public Hasta peekNext() {
@@ -235,7 +233,7 @@ public class HastaHeap {
         } else if (root.left != null) {
             return root.left.data;
         } else {
-            return root.right.data;
+            return root.right != null ? root.right.data : null;
         }
     }
 
@@ -243,7 +241,7 @@ public class HastaHeap {
         Hasta[] hastalar = new Hasta[size];
         if (root == null) return hastalar;
 
-        // Get all patients (not in order)
+        // Get all patients in level order
         List<Hasta> allPatients = new ArrayList<>();
         Queue<Node> queue = new LinkedList<>();
         queue.add(root);

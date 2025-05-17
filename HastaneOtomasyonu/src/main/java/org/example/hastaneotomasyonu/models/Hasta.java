@@ -82,7 +82,7 @@ public class Hasta implements Comparable<Hasta> {
         int engelliSure = engellilikOrani /5;
         int kanamaSure = switch (kanamaliHastaDurumBilgisi.toLowerCase()) {
             case "kanama" -> 10;
-            case "agirkanama" -> 20;
+            case "agirKanama" -> 20;
             default -> 0;
         };
 
