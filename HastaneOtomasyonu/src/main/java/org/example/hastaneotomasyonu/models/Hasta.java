@@ -82,7 +82,7 @@ public class Hasta implements Comparable<Hasta> {
         int engelliSure = engellilikOrani /5;
         int kanamaSure = switch (kanamaliHastaDurumBilgisi.toLowerCase()) {
             case "kanama" -> 10;
-            case "agirKanama" -> 20;
+            case "agirkanama" -> 20;
             default -> 0;
         };
 
@@ -92,8 +92,14 @@ public class Hasta implements Comparable<Hasta> {
     @Override
     public int compareTo(Hasta diger) {
         // YÜKSEK PUAN önce gelsin (MAX HEAP mantığı)
-        return Integer.compare(this.oncelikPuani,diger.oncelikPuani);
+        int puanKarsilastirma = Integer.compare(this.oncelikPuani, diger.oncelikPuani); // büyük olan önce gelsin
+        if (puanKarsilastirma == 0) {
+            return Double.compare(diger.hastaKayitSaati, this.hastaKayitSaati);
+        }
+        // EŞİTSE, kayıt saatine göre kıyasla (erken olan önce gelsin)
+        return puanKarsilastirma;
     }
+
 
 
 

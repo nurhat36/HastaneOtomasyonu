@@ -197,7 +197,7 @@ public class HelloController {
     }
 
 
-
+    private int toplamsure=0;
     private void processNewPatients(double currentTime) {
         Iterator<Hasta> iterator = bekleyenHastalar.iterator();
         while (iterator.hasNext()) {
@@ -205,6 +205,7 @@ public class HelloController {
             if (h.hastaKayitSaati <= currentTime) {
                 h.oncelikPuaniHesapla();
                 h.muayeneSuresiHesapla();
+                toplamsure+=h.muayeneSuresi;
 
                 // Muayene saati = max(kayıt saati, son muayene bitiş saati)
                 double sonBitis = (muayenedekiHasta != null) ? muayeneBitisSaati :
@@ -323,8 +324,12 @@ public class HelloController {
         vboxHastaListesi.getChildren().removeIf(node -> node instanceof HBox); // Önceki kutuları temizle
 
         for (Hasta h : HastaHeap.getTumHastalar()) {
-            String baslangic = df.format(h.getMuayeneSaati() - (24 * day));
+            String baslangic = df.format(h.getMuayeneSaati() );
             String bitis = df.format(saatTopla(h.getMuayeneSaati(), h.muayeneSuresi));
+            if(h.getMuayeneSaati()>24){
+                baslangic = df.format(h.getMuayeneSaati()-24 );
+                bitis = df.format(saatTopla(h.getMuayeneSaati(), h.muayeneSuresi)-24);
+            }
 
             HBox kutucuk = new HBox(10);
             kutucuk.setStyle("-fx-background-color: #ffe0b2; -fx-background-radius: 6; -fx-padding: 8;");
@@ -335,7 +340,7 @@ public class HelloController {
             Label lblAd = new Label(cinsiyetIkonu + " " + h.hastaAdi);
             lblAd.setStyle("-fx-font-weight: bold; -fx-text-fill: #e65100;");
 
-            Label lblSaat = new Label("🕒 " + baslangic + " - " + bitis);
+            Label lblSaat = new Label("🕒 " + baslangic + " - " + bitis+ " - day" +day);
             lblSaat.setStyle("-fx-text-fill: #6d4c41;");
 
             kutucuk.getChildren().addAll(lblAd, lblSaat);
