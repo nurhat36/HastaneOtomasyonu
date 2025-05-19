@@ -40,18 +40,18 @@ public class HastaHeap {
         if (root == null) return null;
 
         // Find parent using level order traversal
-        Queue<Node> queue = new LinkedList<>();
-        queue.add(root);
+        CustomQueue<Node> queue = new CustomQueue<>();
+        queue.enqueue(root);
 
         while (!queue.isEmpty()) {
-            Node current = queue.poll();
+            Node current = queue.dequeue();
 
             if (current.left == null || current.right == null) {
                 return current;
             }
 
-            queue.add(current.left);
-            queue.add(current.right);
+            queue.enqueue(current.left);
+            queue.enqueue(current.right);
         }
         return null;
     }
@@ -103,14 +103,14 @@ public class HastaHeap {
             return;
         }
 
-        Queue<Node> queue = new LinkedList<>();
-        queue.add(root);
+        CustomQueue<Node> queue = new CustomQueue<>();
+        queue.enqueue(root);
         Node current = null;
 
         while (!queue.isEmpty()) {
-            current = queue.poll();
-            if (current.left != null) queue.add(current.left);
-            if (current.right != null) queue.add(current.right);
+            current = queue.dequeue();
+            if (current.left != null) queue.enqueue(current.left);
+            if (current.right != null) queue.enqueue(current.right);
         }
 
         lastNode = current;
@@ -157,14 +157,14 @@ public class HastaHeap {
 
         // Get all patients in heap order using level-order traversal
         List<Hasta> heapOrder = new ArrayList<>();
-        Queue<Node> queue = new LinkedList<>();
-        if (root != null) queue.add(root);
+        CustomQueue<Node> queue = new CustomQueue<>();
+        if (root != null) queue.enqueue(root);
 
         while (!queue.isEmpty()) {
-            Node current = queue.poll();
+            Node current = queue.dequeue();
             heapOrder.add(current.data);
-            if (current.left != null) queue.add(current.left);
-            if (current.right != null) queue.add(current.right);
+            if (current.left != null) queue.enqueue(current.left);
+            if (current.right != null) queue.enqueue(current.right);
         }
 
         // Sort by priority (highest first) for scheduling
@@ -243,14 +243,14 @@ public class HastaHeap {
 
         // Get all patients in level order
         List<Hasta> allPatients = new ArrayList<>();
-        Queue<Node> queue = new LinkedList<>();
-        queue.add(root);
+        CustomQueue<Node> queue = new CustomQueue<>();
+        queue.enqueue(root);
 
         while (!queue.isEmpty()) {
-            Node current = queue.poll();
+            Node current = queue.dequeue();
             allPatients.add(current.data);
-            if (current.left != null) queue.add(current.left);
-            if (current.right != null) queue.add(current.right);
+            if (current.left != null) queue.enqueue(current.left);
+            if (current.right != null) queue.enqueue(current.right);
         }
 
         // Sort by priority (highest first)
