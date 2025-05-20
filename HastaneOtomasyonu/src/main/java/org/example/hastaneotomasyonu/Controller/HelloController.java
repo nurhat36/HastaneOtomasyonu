@@ -152,7 +152,7 @@ public class HelloController {
 
         System.out.println(doubleToSaatDakika1(simuleEdilenZaman.get()));
 
-        // Diğer sistem güncellemeleri
+
         processNewPatients(doubleToSaatDakika1(simuleEdilenZaman.get()));
         checkCurrentExamination(doubleToSaatDakika1(simuleEdilenZaman.get()));
         displayCurrentExaminationStatus(doubleToSaatDakika1(simuleEdilenZaman.get()));
@@ -165,22 +165,22 @@ public class HelloController {
 
             double currentTime = getCurrentDoubleTime();
 
-            // 1. Muayenedeki hastanın durumunu kontrol et
+
             checkCurrentExamination(currentTime);
 
-            // 2. Yeni hastaları işle (muayenede hasta yoksa veya muayene bittiyse)
+
             if (muayenedekiHasta == null || currentTime >= muayeneBitisSaati) {
                 processNewPatients(currentTime);
 
             }
 
-            // 3. Muayene için yeni hasta al
+
             if (muayenedekiHasta == null && !HastaHeap.bosMu()) {
                 startNewExamination(currentTime);
 
             }
 
-            // 4. Durum bilgilerini göster
+
             displayCurrentExaminationStatus(currentTime);
         }));
 
@@ -197,50 +197,54 @@ public class HelloController {
     }
 
 
-    private int toplamsure=0;
+    private int toplamsure = 0;
+
     private void processNewPatients(double currentTime) {
-        Iterator<Hasta> iterator = bekleyenHastalar.iterator();
-        while (iterator.hasNext()) {
-            Hasta h = iterator.next();
+        List<Hasta> islenecekHastalar = new ArrayList<>();
+
+        for (Hasta h : bekleyenHastalar) {
             if (h.hastaKayitSaati <= currentTime) {
                 h.oncelikPuaniHesapla();
                 h.muayeneSuresiHesapla();
-                toplamsure+=h.muayeneSuresi;
+                toplamsure += 1;
+                h.setHastaNo(toplamsure);
 
-                // Muayene saati = max(kayıt saati, son muayene bitiş saati)
                 double sonBitis = (muayenedekiHasta != null) ? muayeneBitisSaati :
                         calculateLastFinishTime();
                 h.setMuayeneSaati(Math.max(h.hastaKayitSaati, sonBitis));
-                System.out.println("son bitiş saati: " + sonBitis+"  hasta kayıt saati "+h.hastaKayitSaati);
+
+                System.out.println("son bitiş saati: " + sonBitis + "  hasta kayıt saati " + h.hastaKayitSaati);
                 System.out.println(h.muayeneSaati);
 
-
-
                 HastaHeap.ekle(h);
-                iterator.remove();
+                islenecekHastalar.add(h);
             }
         }
+
+        // Tüm işlenen hastaları ana listeden çıkar
+        bekleyenHastalar.removeAll(islenecekHastalar);
     }
+
     private final VoiceAnnouncementService announcementService = new VoiceAnnouncementService();
 
     private void displayCurrentExaminationStatus(double currentTime) {
         DecimalFormat df = new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.US)); // Noktalı format
 
-        // Muayenedeki hasta bilgileri
+
         if (muayenedekiHasta != null) {
             String cinsiyetIkonu = muayenedekiHasta.cinsiyet.equalsIgnoreCase("E") ? "👨" : "👩";
-            lblMuayenedekiHasta.setText(cinsiyetIkonu + " " + muayenedekiHasta.hastaAdi);
+            lblMuayenedekiHasta.setText("No:"+muayenedekiHasta.hastaNo+"  "+cinsiyetIkonu + " " + muayenedekiHasta.hastaAdi);
 
             double baslangic = muayenedekiHasta.getMuayeneSaati() - (24 * day);
             lblBaslangic.setText(df.format(baslangic));
             lblbitissaati.setText(df.format(muayeneBitisSaati - (24 * day)));
 
-            // ♿ Engellilik oranı
+
             if (muayenedekiHasta.engellilikOrani > 0) {
                 lblMuayenedekiHasta.setText(lblMuayenedekiHasta.getText() + "  ♿ %" + muayenedekiHasta.engellilikOrani);
             }
 
-            // 🩸 Kanama durumu
+
             if (muayenedekiHasta.kanamaliHastaDurumBilgisi != null &&
                     !muayenedekiHasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("kanamaYok")) {
                 if (muayenedekiHasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("agirKanama")) {
@@ -255,18 +259,18 @@ public class HelloController {
             System.out.printf("   Başlangıç: %.2f, Bitiş: %.2f%n",
                     muayenedekiHasta.getMuayeneSaati(), muayeneBitisSaati);
 
-            // Sıradaki hasta bilgisi
+
             if (!HastaHeap.bosMu()) {
                 Hasta siradaki = HastaHeap.peek();
                 String cinsiyetIkonuSiradaki = siradaki.cinsiyet.equalsIgnoreCase("E") ? "👨" : "👩";
-                String siradakiHastaText = cinsiyetIkonuSiradaki + " " + siradaki.hastaAdi;
+                String siradakiHastaText = "No:"+siradaki.hastaNo+"  "+cinsiyetIkonuSiradaki + " " + siradaki.hastaAdi;
 
-                // ♿ engellilik oranı
+
                 if (siradaki.engellilikOrani > 0) {
                     siradakiHastaText += "  ♿ %" + siradaki.engellilikOrani;
                 }
 
-                // 🩸 Kanama durumu
+
                 if (siradaki.kanamaliHastaDurumBilgisi != null &&
                         !siradaki.kanamaliHastaDurumBilgisi.equalsIgnoreCase("kanamaYok")) {
                     if (siradaki.kanamaliHastaDurumBilgisi.equalsIgnoreCase("agirKanama")) {
@@ -293,12 +297,12 @@ public class HelloController {
             String cinsiyetIkonu = ilkHasta.cinsiyet.equalsIgnoreCase("E") ? "👨" : "👩";
             String ilkHastaText = cinsiyetIkonu + " " + ilkHasta.hastaAdi;
 
-            // ♿ engellilik oranı
+
             if (ilkHasta.engellilikOrani > 0) {
                 ilkHastaText += "  ♿ %" + ilkHasta.engellilikOrani;
             }
 
-            // 🩸 kanama
+
             if (ilkHasta.kanamaliHastaDurumBilgisi != null &&
                     !ilkHasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("kanamaYok")) {
                 if (ilkHasta.kanamaliHastaDurumBilgisi.equalsIgnoreCase("agirKanama")) {
@@ -320,7 +324,7 @@ public class HelloController {
                     " (Muayene Başlangıç: " + ilkHasta.getMuayeneSaati() + ")");
         }
 
-        // 🔽 Tüm sıradaki hastaları listele
+
         vboxHastaListesi.getChildren().removeIf(node -> node instanceof HBox); // Önceki kutuları temizle
 
         for (Hasta h : HastaHeap.getTumHastalar()) {
@@ -337,7 +341,7 @@ public class HelloController {
 
             String cinsiyetIkonu = h.cinsiyet.equalsIgnoreCase("E") ? "👨" : "👩";
 
-            Label lblAd = new Label(cinsiyetIkonu + " " + h.hastaAdi);
+            Label lblAd = new Label("No:"+h.hastaNo+"  "+cinsiyetIkonu + " " + h.hastaAdi);
             lblAd.setStyle("-fx-font-weight: bold; -fx-text-fill: #e65100;");
 
             Label lblSaat = new Label("🕒 " + baslangic + " - " + bitis+ " - day" +day);
@@ -374,18 +378,18 @@ public class HelloController {
 
 
     private void processPastPatients(double currentTime) {
-        Iterator<Hasta> iterator = bekleyenHastalar.iterator();
-        double enSonBitisSaati = 0.0;
+        List<Hasta> silinecekler = new ArrayList<>();
 
-        while (iterator.hasNext()) {
-            Hasta h = iterator.next();
-
+        for (Hasta h : bekleyenHastalar) {
             if (h.hastaKayitSaati >= 8.00 && h.hastaKayitSaati <= currentTime) {
                 processPatient(h, currentTime);
-                iterator.remove();
+                silinecekler.add(h);
             }
         }
+
+        bekleyenHastalar.removeAll(silinecekler);
     }
+
 
 
 
@@ -393,7 +397,7 @@ public class HelloController {
         h.oncelikPuaniHesapla();
         h.muayeneSuresiHesapla();
 
-        // Muayene başlangıç saatini doğru şekilde hesapla
+
         double sonBitisSaati;
         if (muayenedekiHasta != null) {
             sonBitisSaati = muayeneBitisSaati;
@@ -410,7 +414,7 @@ public class HelloController {
         if (!HastaHeap.bosMu()) {
             Hasta yeniMuayeneHasta = HastaHeap.cikar();
 
-            // Hasta muayene zamanı geldiyse
+
             if (yeniMuayeneHasta.getMuayeneSaati() <= currentTime) {
                 muayenedekiHasta = yeniMuayeneHasta;
                 muayeneBitisSaati = saatTopla(muayenedekiHasta.getMuayeneSaati(),
@@ -420,14 +424,14 @@ public class HelloController {
                         " (Başlangıç: " + muayenedekiHasta.getMuayeneSaati() +
                         ", Bitiş: " + muayeneBitisSaati + ")");
 
-                // Sıradaki hastanın başlangıç saatini güncelle
+
                 if (!HastaHeap.bosMu()) {
                     Hasta siradaki = HastaHeap.peek();
                     double yeniBaslangic = muayeneBitisSaati;
                     siradaki.setMuayeneSaati(yeniBaslangic);
                 }
             } else {
-                // Henüz zamanı gelmedi, heap'e geri ekle
+
                 HastaHeap.ekle(yeniMuayeneHasta);
             }
         }
@@ -449,28 +453,28 @@ public class HelloController {
     }
 
     private void processFinishedExaminations(double currentTime) {
-        // Muayenesi bitmiş hastaları çıkar
+
         while (!HastaHeap.bosMu()) {
             Hasta enOncelikli = HastaHeap.peek();
             double bitisZamani = saatTopla(enOncelikli.getMuayeneSaati(), enOncelikli.getMuayeneSuresi());
 
-            // Eğer hasta henüz muayeneye başlamadıysa döngüyü kır
+
             if (currentTime < enOncelikli.getMuayeneSaati()) {
                 break;
             }
 
-            // Eğer hasta muayenesini bitirdiyse çıkar
+
             if (currentTime >= bitisZamani) {
                 Hasta cikan = HastaHeap.cikar();
                 System.out.println("✅ Muayenesi biten: " + cikan.hastaAdi +
                         " (Bitiş: " + bitisZamani + ")");
             }
-            // Eğer hasta hala muayenedeyse
+
             else if (currentTime >= enOncelikli.getMuayeneSaati() && currentTime < bitisZamani) {
                 System.out.println("⚠️ Muayenedeki hasta: " + enOncelikli.hastaAdi +
                         " (Başlangıç: " + enOncelikli.getMuayeneSaati() +
                         ", Bitiş: " + bitisZamani + ")");
-                break; // Muayenedeki hasta bitene kadar diğerlerine dokunma
+                break;
             }
         }
     }

@@ -36,7 +36,7 @@ public class Hasta implements Comparable<Hasta> {
     }
 
     public void oncelikPuaniHesapla() {
-        // Yaş puanı hesaplama (formülle tam uyumlu)
+
         int yasPuani;
         if (hastaYasi >= 0 && hastaYasi < 5) {
             yasPuani = 20;
@@ -47,16 +47,16 @@ public class Hasta implements Comparable<Hasta> {
         } else if (hastaYasi >= 65) {
             yasPuani = 25;
         } else {
-            yasPuani = 0; // Geçersiz yaş için
+            yasPuani = 0;
         }
 
-        // Mahkumluk durumu (formülde belirtilmemiş, önceki koddan korundu)
+
         int mahkumPuani = mahkumlukDurumBilgisi ? 50 : 0;
 
-        // Engellilik puanı (engellilikOrani/4 şeklinde hesaplanacak)
+
         int engelliPuani = engellilikOrani / 4;
 
-        // Kanama durumu puanı
+
         int kanamaPuani = 0;
         if (kanamaliHastaDurumBilgisi != null) {
             switch (kanamaliHastaDurumBilgisi.toLowerCase()) {
@@ -72,7 +72,7 @@ public class Hasta implements Comparable<Hasta> {
             }
         }
 
-        // Toplam puan hesaplama
+
         this.oncelikPuani = yasPuani + mahkumPuani + engelliPuani + kanamaPuani;
     }
 
@@ -91,19 +91,19 @@ public class Hasta implements Comparable<Hasta> {
 
     @Override
     public int compareTo(Hasta diger) {
-        // YÜKSEK PUAN önce gelsin (MAX HEAP mantığı)
-        int puanKarsilastirma = Integer.compare(this.oncelikPuani, diger.oncelikPuani); // büyük olan önce gelsin
+
+        int puanKarsilastirma = Integer.compare(this.oncelikPuani, diger.oncelikPuani);
         if (puanKarsilastirma == 0) {
             return Double.compare(diger.hastaKayitSaati, this.hastaKayitSaati);
         }
-        // EŞİTSE, kayıt saatine göre kıyasla (erken olan önce gelsin)
+
         return puanKarsilastirma;
     }
 
 
 
 
-    // --- GÖSTERİM İÇİN GEREKEN GETTER'LAR ---
+
 
     public String getHastaAdi() {
         return hastaAdi;
@@ -116,9 +116,15 @@ public class Hasta implements Comparable<Hasta> {
     public double getMuayeneSaati() {
         return muayeneSaati;
     }
+    public  void setHastaNo(int hastaNo){
+        this.hastaNo = hastaNo;
+    }
+    public int getHastaNo(){
+        return hastaNo;
+    }
 
     public void setMuayeneSaati(double yeniMuayeneSaati) {
-        // Eğer yeni muayene saati, hasta kayıt saatinden önce ise, hata fırlatıyoruz
+
         if (yeniMuayeneSaati < hastaKayitSaati) {
             throw new IllegalArgumentException("Muayene saati (" + yeniMuayeneSaati + ") kayıt saatinden önce olamaz. Kayıt Saati: " + hastaKayitSaati);
         } else if (yeniMuayeneSaati<9.00) {

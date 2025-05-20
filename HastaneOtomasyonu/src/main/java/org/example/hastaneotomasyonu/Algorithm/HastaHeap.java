@@ -13,7 +13,7 @@ public class HastaHeap {
     public class Node {
         Hasta data;
         Node left, right, parent;
-        Node next; // For linked list structure
+
 
         Node(Hasta data) {
             this.data = data;
@@ -39,7 +39,7 @@ public class HastaHeap {
     private Node findParentForNewNode() {
         if (root == null) return null;
 
-        // Find parent using level order traversal
+
         CustomQueue<Node> queue = new CustomQueue<>();
         queue.enqueue(root);
 
@@ -75,7 +75,7 @@ public class HastaHeap {
             return maxValue;
         }
 
-        // Move last node's data to root
+
         root.data = lastNode.data;
 
         // Remove the last node
@@ -167,11 +167,11 @@ public class HastaHeap {
             if (current.right != null) queue.enqueue(current.right);
         }
 
-        // Sort by priority (highest first) for scheduling
+
         List<Hasta> sortedPatients = new ArrayList<>(heapOrder);
         sortedPatients.sort((h1, h2) -> Integer.compare(h2.getOncelikPuani(), h1.getOncelikPuani()));
 
-        // Calculate examination times
+
         double currentTime = HelloController.muayeneBitisSaati;
         if (currentTime == 0) {
             currentTime = 9.00;
@@ -253,7 +253,7 @@ public class HastaHeap {
             if (current.right != null) queue.enqueue(current.right);
         }
 
-        // Sort by priority (highest first)
+
         allPatients.sort((h1, h2) -> Integer.compare(h2.getOncelikPuani(), h1.getOncelikPuani()));
 
         return allPatients.toArray(hastalar);
