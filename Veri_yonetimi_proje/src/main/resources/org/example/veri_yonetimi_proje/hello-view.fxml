@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.veri_yonetimi_proje.HelloController"
+            prefWidth="900" prefHeight="600">
+
+    <!-- Üst Başlık -->
+    <top>
+        <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-background-color: #2C3E50;">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <Label text="ÖĞRENCİ KAYIT SİSTEMİ"
+                   style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+        </HBox>
+    </top>
+
+    <!-- Sol Menü -->
+    <left>
+        <VBox spacing="10" style="-fx-background-color: #ECF0F1;">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <Button text="Yeni Öğrenci Ekle" onAction="#onYeniOgrenciEkle"/>
+            <Button text="Öğrenci Güncelle" onAction="#onOgrenciGuncelle"/>
+            <Button text="Öğrenci Sil" onAction="#onOgrenciSil"/>
+            <Button text="Tüm Öğrencileri Listele" onAction="#onTumListele"/>
+            <Button text="Numaraya Göre Ara" onAction="#onNumarayaGoreAra"/>
+            <Button text="Ada Göre Ara" onAction="#onAdaGoreAra"/>
+            <Button text="Hash Tablosunu Göster" onAction="#onHashGoster"/>
+        </VBox>
+    </left>
+
+    <!-- Orta Kısım -->
+    <center>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <HBox spacing="10">
+                <Label text="Ara:"/>
+                <TextField fx:id="txtArama" promptText="Öğrenci Adı veya Numarası" prefWidth="200"/>
+                <Button text="Ara" onAction="#onAraTikla"/>
+            </HBox>
+
+            <TableView fx:id="tblOgrenciler" prefHeight="500">
+                <columns>
+                    <TableColumn fx:id="colNo" text="No" prefWidth="80"/>
+                    <TableColumn fx:id="colAd" text="Ad" prefWidth="120"/>
+                    <TableColumn fx:id="colSoyad" text="Soyad" prefWidth="120"/>
+                    <TableColumn fx:id="colGano" text="GANO" prefWidth="80"/>
+                    <TableColumn fx:id="colSinif" text="Sınıf" prefWidth="80"/>
+                    <TableColumn fx:id="colBolumSira" text="Bölüm Sırası" prefWidth="100"/>
+                    <TableColumn fx:id="colCinsiyet" text="Cinsiyet" prefWidth="80"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+</BorderPane>
